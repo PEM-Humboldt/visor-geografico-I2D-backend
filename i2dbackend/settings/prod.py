@@ -3,7 +3,7 @@ from .base import *
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['web']
+ALLOWED_HOSTS = ['web','localhost']
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
@@ -14,7 +14,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
 
         'OPTIONS': {
-            'options': '-c search_path=django,gbif_consultas'
+            'options': '-c search_path=django,gbif_consultas,capas_base'
         },
 
         'NAME': get_secret('DB_NAME'),

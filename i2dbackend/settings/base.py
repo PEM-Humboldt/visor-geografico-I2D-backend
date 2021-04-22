@@ -14,7 +14,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-with open(os.path.join(os.path.dirname(__file__), "secret.json")) as f:
+with open("secret.json") as f:
     secret = json.loads(f.read())
 
 def get_secret(secret_name, secrets=secret):
@@ -28,19 +28,6 @@ SECRET_KEY = get_secret('SECRET_KEY')
 
 # Application definition
 
-# INSTALLED_APPS = [
-#     'django.contrib.admin',
-#     'django.contrib.auth',
-#     'django.contrib.contenttypes',
-#     'django.contrib.sessions',
-#     'django.contrib.messages',
-#     'django.contrib.staticfiles',
-#     'applications.map',
-#     'applications.mupio',
-#     'applications.user',
-#     'rest_framework'
-# ]
-
 DJANGO_APPS = (
     'django.contrib.admin',
     'django.contrib.auth',
@@ -52,7 +39,8 @@ DJANGO_APPS = (
 
 LOCAL_APPS = (
     'applications.mupio',
-    'applications.user',
+    'applications.mupiopolitico',
+    'applications.gbif',
 )
 
 THIRD_PARTY_APPS = (

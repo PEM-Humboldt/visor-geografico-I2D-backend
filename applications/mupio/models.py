@@ -12,25 +12,3 @@ class MpioTipo(models.Model):
     class Meta:
         managed = False
         db_table = 'mpio_tipo'
-
-
-
-# from django.db import models
-
-# # Create your models here.
-
-# class Mupio_tipo(models.Model):
-#     mpio_ccnct= models.CharField('cod_mupio',max_length=20,primary_key = True)
-#     tipo= models.CharField('tipo',max_length=20)
-#     count= models.PositiveBigIntegerField(auto_created = True, 
-#     serialize = False, 
-#     verbose_name ='cantidad')
-#     mpio_cnmbr= models.CharField('nomb_mupio',max_length=20)
-
-#     # class Meta:
-#     #     verbose_name = "Tipo por municipio"
-#     #     verbose_name_plural = "Tipos por municipio"
-#     #     ordering =['-mpio_cnmbr']
-        
-#     def __str__(self):
-#         return self.mpio_ccnct+'-'+self.tipo
