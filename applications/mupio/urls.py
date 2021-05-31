@@ -3,6 +3,6 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    # path('mupio/', views.mupioChart.as_view()),
-    path('api/mpio/chartdata/<kid>', views.mupioChart.as_view()),
+    path('api/mpio/registers/<kid>', views.mupioRegister.as_view()),
+    path('api/mpio/species/<kid>', views.mupioSpecie.as_view()),
 ]

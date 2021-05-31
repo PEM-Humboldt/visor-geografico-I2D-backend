@@ -1,11 +1,19 @@
 
 from rest_framework import serializers
 
-from .models import MpioTipo
+from .models import MpioRegisters,MpioSpecies
 
-class mpioChartSerializer(serializers.ModelSerializer):
+class mpioRegistersSerializer(serializers.ModelSerializer):
     class Meta:
-        model= MpioTipo
+        model= MpioRegisters
+        fields =(
+            'tipo',
+            'count'
+        )
+
+class mpioSpeciesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model= MpioSpecies
         fields =(
             'tipo',
             'count'

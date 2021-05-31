@@ -8,8 +8,8 @@ class mpioPoliticoSerializer(serializers.ModelSerializer):
         model= MpioPolitico
         fields =(
             'gid',
-            'mpio_cnmbr',
-            'dpto_cnmbr',      
-            'center_coord'      
+            'nombre',
+            'dpto_nombre',      
+            'coord_central'     
         )
 

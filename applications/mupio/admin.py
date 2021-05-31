@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import MpioTipo
+from .models import MpioRegisters
 # Register your models here.
 
-admin.site.register(MpioTipo)
+admin.site.register(MpioRegisters)
