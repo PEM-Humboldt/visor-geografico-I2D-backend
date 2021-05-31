@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.gis.db import models
 # from django.contrib.gis.db import models
 
 # Create your models here.
@@ -10,7 +9,7 @@ class MpioPolitico(models.Model):
     dpto_nombre = models.CharField(max_length=254, blank=True, null=True)
     nombre = models.CharField(max_length=254, blank=True, null=True)
     area_ha = models.DecimalField(max_digits=65535, decimal_places=65535, blank=True, null=True)
-    geom = models.GeometryField(blank=True, null=True)
+    geom = models.TextField(blank=True, null=True)  # This field type is a guess.
     coord_central = models.TextField(blank=True, null=True)
     class Meta:
         managed = False
