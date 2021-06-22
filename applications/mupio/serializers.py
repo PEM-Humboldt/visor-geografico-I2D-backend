@@ -1,20 +1,25 @@
 
 from rest_framework import serializers
 
-from .models import MpioRegisters,MpioSpecies
+from .models import MpioQueries,MpioAmenazas
 
-class mpioRegistersSerializer(serializers.ModelSerializer):
+class mpioQueriesSerializer(serializers.ModelSerializer):
     class Meta:
-        model= MpioRegisters
+        model= MpioQueries
         fields =(
             'tipo',
-            'count'
+            'registers',
+            'species',
+            'exoticas',
+            'endemicas'
         )
 
-class mpioSpeciesSerializer(serializers.ModelSerializer):
+class mpioDangerSerializer(serializers.ModelSerializer):
     class Meta:
-        model= MpioSpecies
+        model= MpioAmenazas
         fields =(
+            'codigo',
             'tipo',
-            'count'
+            'amenazadas',
+            'nombre'
         )
