@@ -13,4 +13,5 @@ urlpatterns = [
     re_path('',include('applications.mupio.urls')),
     re_path('',include('applications.mupiopolitico.urls')),
     re_path('',include('applications.gbif.urls')),
+    re_path('',include('applications.user.urls')),
 ]

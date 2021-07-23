@@ -41,6 +41,7 @@ LOCAL_APPS = (
     'applications.mupio',
     'applications.mupiopolitico',
     'applications.gbif',
+    'applications.user',
 )
 
 THIRD_PARTY_APPS = (
