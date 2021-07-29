@@ -14,7 +14,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
 
         'OPTIONS': {
-            'options': '-c search_path=django,gbif_consultas,capas_base'
+            'options': '-c search_path=django,gbif_consultas,capas_base,geovisor'
         },
 
         'NAME': get_secret('DB_NAME'),
