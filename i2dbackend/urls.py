@@ -10,6 +10,7 @@ from django.urls import path, re_path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     # se incluyen las urls de las apps
+    re_path('',include('applications.dpto.urls')),
     re_path('',include('applications.mupio.urls')),
     re_path('',include('applications.mupiopolitico.urls')),
     re_path('',include('applications.gbif.urls')),

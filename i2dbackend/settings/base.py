@@ -38,6 +38,7 @@ DJANGO_APPS = (
 )
 
 LOCAL_APPS = (
+    'applications.dpto',
     'applications.mupio',
     'applications.mupiopolitico',
     'applications.gbif',
