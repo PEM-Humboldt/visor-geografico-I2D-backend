@@ -32,7 +32,7 @@ def generar_csv(query, params):
     return output.getvalue()
 
 @api_view(['GET'])
-def descargar_zip(request):
+def descargarzip(request):
     filtro = {}
     if request.GET.get('codigo_mpio'):
         filtro["codigo_mpio"] = request.GET['codigo_mpio']
