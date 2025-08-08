@@ -3,7 +3,9 @@ from .base import *
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['ec2-54-197-164-22.compute-1.amazonaws.com']
+#ALLOWED_HOSTS = ['ec2-52-203-40-156.compute-1.amazonaws.com']
+ALLOWED_HOSTS = ['https://api-v1s0r.humboldt.org.co']
+#ALLOWED_HOSTS = ['localhost','127.0.0.1','https://api-v1s0r.humboldt.org.co']
 
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
