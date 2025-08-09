@@ -1,4 +1,3 @@
-
 # Backend-Visor-I2D
 El backend visor geografico I2D es un componente que permite interactuar con una base de datos de información geográfica que contiene información de registros biológicos.
 
@@ -31,7 +30,7 @@ Esta es una versión preliminar y se implementarán nuevas funcionalidades.
 
 ### Instalación y ejecución
 
-Debe tener instalado python y pip en su equipo local, para la instalación de paquetes y ejecución del proyecto sin utilizar docker. 
+Debe tener instalado python y pip en su equipo local, para la instalación de paquetes y ejecución del proyecto sin utilizar docker.
 
 Clone el proyecto en su equipo e ingrese por línea de comandos al directorio del proyecto.
 
@@ -57,7 +56,39 @@ El proyecto necesita un archivo secret.json con la siguiente plantilla:
 ```
 Completar el archivo con las credenciales correspondientes y copiarlo en la raíz del proyecto.
 
-### 1.3. Instalación de paquetes:
+### 1.3. Configuración de variables de entorno (.env)
+
+El proyecto también soporta configuración mediante variables de entorno usando un archivo `.env`. Crear un archivo `.env` en la raíz del proyecto con las siguientes variables:
+
+#### Variables de base de datos:
+```bash
+# Configuración de base de datos
+DB_ENGINE=django.db.backends.postgresql_psycopg2
+DB_NAME=nombre_de_tu_base_de_datos
+DB_USER=usuario_de_base_de_datos
+DB_PASSWORD=contraseña_de_base_de_datos
+DB_HOST=localhost
+DB_PORT=5432
+DB_OPTIONS=-c search_path=django,gbif_consultas,capas_base,geovisor
+```
+
+#### Variables de configuración general:
+```bash
+# Configuración de Django
+DEBUG=true
+ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+
+# Configuración de archivos estáticos y media
+STATIC_ROOT=/app/static
+MEDIA_ROOT=/app/media
+
+# Configuración de CORS
+CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+```
+
+**Nota:** Las variables de entorno tienen prioridad sobre los valores del archivo `secret.json`. Si una variable está definida en ambos lugares, se usará el valor de la variable de entorno.
+
+### 1.4. Instalación de paquetes:
 Ubiquese en la carpeta i2dbackend y ejecute la siguiente sentencia para instalar las dependencias del proyecto:
 ```
     cd ../../../ i2dbackend
@@ -69,8 +100,8 @@ Ubiquese en la carpeta i2dbackend y ejecute la siguiente sentencia para instalar
 ```
     python manage.py inspectdb
 ``` -->
-### 1.4. Para crear nuevos modelos automáticamente en el entorno del administrador
-Verifiqué que no hay errores 
+### 1.5. Para crear nuevos modelos automáticamente en el entorno del administrador
+Verifiqué que no hay errores
 ```
     python manage.py makemigrations
 ```
@@ -78,7 +109,7 @@ Migre los modelos
 ```
     python manage.py migrate
 ```
-### 1.5. Ejecución en entorno de desarrollo:
+### 1.6. Ejecución en entorno de desarrollo:
 Ejecute la siguiente instrucción:
 
 ```
@@ -101,7 +132,7 @@ La herramienta [Docker-compose](https://docs.docker.com/compose/) se utilizará 
 
 Es necesario contar con la versión 19.03.13 de Docker o superior y Docker-compose versión 1.28.5.
 
-La instalación se puede hacer siguiendo los pasos según el sistema operativo en la documentación oficial de Docker. 
+La instalación se puede hacer siguiendo los pasos según el sistema operativo en la documentación oficial de Docker.
 
 ### 2.2. Despliegue
 
