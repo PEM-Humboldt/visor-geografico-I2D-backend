@@ -5,7 +5,7 @@ import os
 DEBUG = os.getenv('DEBUG', 'true').lower() == 'true'
 
 # ALLOWED_HOSTS configuration
-allowed_hosts_env = os.getenv('ALLOWED_HOSTS', 'ec2-54-197-164-22.compute-1.amazonaws.com,0.0.0.0,localhost,127.0.0.1')
+allowed_hosts_env = os.getenv('ALLOWED_HOSTS', '0.0.0.0,localhost,127.0.0.1')
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',')]
 
 # Database

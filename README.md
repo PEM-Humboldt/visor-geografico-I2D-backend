@@ -89,19 +89,12 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 **Nota:** Las variables de entorno tienen prioridad sobre los valores del archivo `secret.json`. Si una variable está definida en ambos lugares, se usará el valor de la variable de entorno.
 
 ### 1.4. Instalación de paquetes:
-Ubiquese en la carpeta i2dbackend y ejecute la siguiente sentencia para instalar las dependencias del proyecto:
+Ubíquese en la carpeta raíz del proyecto y ejecute la siguiente sentencia para instalar las dependencias del proyecto:
 ```
-    cd ../../../ i2dbackend
-
     pip install -r requirements.txt
 ```
-
-<!-- ### 1.4. Para crear nuevos modelos automáticamente a partir de la base de datos de PostgreSql
-```
-    python manage.py inspectdb
-``` -->
 ### 1.5. Para crear nuevos modelos automáticamente en el entorno del administrador
-Verifiqué que no hay errores
+Verifique que no hay errores
 ```
     python manage.py makemigrations
 ```
