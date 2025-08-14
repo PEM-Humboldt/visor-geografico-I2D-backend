@@ -1,0 +1,17 @@
+{
+  "include": ["applications", "i2dbackend"],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "media",
+    ".venv",
+    "venv",
+    "migrations"
+  ],
+  "reportMissingImports": true,
+  "reportMissingTypeStubs": false,
+  "pythonVersion": "3.10",
+  "typeCheckingMode": "basic",
+  "venvPath": ".",
+  "venv": ".venv"
+}
