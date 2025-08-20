@@ -202,9 +202,9 @@ cd docs/
 
 ### 3.4. Qué hace el Script
 
-El script ejecuta **24 consultas** organizadas en dos secciones:
+El script ejecuta múltiples consultas organizadas en dos secciones:
 
-#### **Sección 1: Verificación de Infraestructura (14 consultas)**
+#### **Sección 1: Verificación de Infraestructura **
 - **Conectividad**: Verifica conexión a la base de datos y versión de PostgreSQL
 - **Esquemas**: Lista todos los esquemas disponibles y permisos de acceso
 - **Tablas**: Inventario de tablas por esquema con información de propietarios
@@ -214,7 +214,7 @@ El script ejecuta **24 consultas** organizadas en dos secciones:
 - **Tamaños**: Análisis de uso de almacenamiento por base de datos
 - **Conexiones**: Monitoreo de conexiones activas
 
-#### **Sección 2: Consultas del Backend (10 consultas)**
+#### **Sección 2: Consultas del Backend **
 - **Biodiversidad por Departamento**: Prueba consultas de especies por departamento
 - **Especies Amenazadas**: Verifica datos de conservación por región
 - **Biodiversidad por Municipio**: Prueba consultas municipales
@@ -261,8 +261,8 @@ El script ha sido optimizado para evitar problemas de rendimiento:
 # Verificar contenedores activos
 docker ps
 
-# Iniciar contenedor si está detenido
-docker-compose up -d db
+# Iniciar los contenedores si está detenido
+docker-compose up -d
 ```
 
 #### Error: "bc command not found"

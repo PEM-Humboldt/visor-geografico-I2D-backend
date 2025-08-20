@@ -11,7 +11,8 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'i2dbackend.settings.local')
 django.setup()
 
 from applications.dpto.models import DptoQueries
-from applications.mupio.models import MpioQueries
+from applications.mpio.models import MpioQueries
+
 
 print("🚀 Quick Django GIS Test")
 print("=" * 25)

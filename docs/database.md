@@ -14,31 +14,31 @@ This technical report documents the database architecture, optimizations, change
 - **Port**: 5432 (mapped to host)
 - **Network**: `visor_network`
 
-### Database Credentials
-- **Database Name**: `i2d_db`
-- **Username**: `i2d_user`
-- **Password**: `i2d_password`
-- **Host Authentication**: Trust method enabled
-
+### Database Credentials (examples; do not commit real secrets)
+- Database: `<DB_NAME>`
+- Username: `<DB_USER>`
+- Password: `<DB_PASSWORD>` (store in .env / secrets manager)
+- Host Authentication: `trust` (local/dev only). Use `md5` with strong passwords in production.
 ## Database Structure Documentation
 
 ### Schema Organization
 The database is organized into multiple schemas for logical data separation:
 
 ```sql
-search_path=django,gbif_consultas,capas_base,geovisor
+search_path=django,gbif_consultas,capas_base,geovisor,public
 ```
 
 **⚠️ Note**: The configured search path includes 4 schemas, but actual database may contain fewer schemas depending on setup and user permissions.
 
 #### **Verified Schemas** (as of database inspection):
-- **i2d_db**: Main application database schema
+- **i2d_db**: Main application database
 - **gbif_consultas**: GBIF (Global Biodiversity Information Facility) query results
 
 #### **Expected Schemas** (from configuration):
 - **django**: Django application tables and metadata
 - **capas_base**: Base geographic layers and spatial data
 - **geovisor**: Geographic viewer specific data
+- (Common default) **public**
 
 ### Schema Verification Queries
 
@@ -64,6 +64,7 @@ SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = 'capas_base') AS capas_
        EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = 'geovisor') AS geovisor_exists,
        EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = 'django') AS django_exists,
        EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = 'gbif_consultas') AS gbif_consultas_exists;
+       EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = 'public') AS public_consultas_exists;
 ```
 
 ### Schema Permission Issues
@@ -122,14 +123,9 @@ GRANT USAGE ON SCHEMA gbif_consultas TO i2d_user;
 ### Geometric Data Handling
 
 **Current Implementation**:
-- Geometric fields are currently stored as TEXT fields
-- Commented PostGIS GeometryField implementations available for future optimization
-
-**Optimization Opportunity**:
-```python
-# Current: geom = models.TextField(blank=True, null=True)
-# Optimized: geom = models.GeometryField(blank=True, null=True)
-```
+- ✅ **PostGIS GeometryField already implemented and active**
+- Native PostGIS geometry columns with spatial indexing capabilities
+- Full spatial query support with ST_* functions available
 
 ## Database Changes and Migrations
 
@@ -146,17 +142,7 @@ GRANT USAGE ON SCHEMA gbif_consultas TO i2d_user;
 environment:
   - POSTGRES_DB=i2d_db
   - POSTGRES_USER=i2d_user
-  - POSTGRES_PASSWORD=i2d_password
-  - POSTGRES_HOST_AUTH_METHOD=trust
-  - POSTGRES_SHARED_PRELOAD_LIBRARIES=postgis
-  - POSTGRES_EFFECTIVE_CACHE_SIZE=1GB
-  - POSTGRES_SHARED_BUFFERS=256MB
-  - POSTGRES_MAX_CONNECTIONS=100
-```
 
-#### 2. PostGIS Extension Integration
-- Automated PostGIS extension initialization
-- Custom initialization script: `scripts/init-postgis.sql`
 - Spatial indexing capabilities enabled
 
 #### 3. Data Restoration Process
@@ -593,12 +579,12 @@ The database is currently stable and performant for the project's needs, with cl
 Database analysis confirms PostGIS is already implemented:
 ```sql
 -- VERIFIED: All geometry columns are PostGIS native
-column_name | udt_name |  data_type   
+column_name | udt_name |  data_type
 ------------|----------|-------------
 geom        | geometry | USER-DEFINED  -- All tables confirmed
 
 -- VERIFIED: Contains valid PostGIS geometries
-st_geometrytype | count 
+st_geometrytype | count
 ----------------|-------
 ST_MultiPolygon |   297  -- Valid spatial data
 ```
@@ -768,7 +754,7 @@ GROUP BY d.codigo, d.nombre;
 
 -- Spatial distance calculations
 SELECT codigo, nombre, ST_Area(geom) as area_m2
-FROM gbif_consultas.dpto_queries 
+FROM gbif_consultas.dpto_queries
 WHERE ST_Area(geom) > 1000000;  -- Areas larger than 1M square meters
 
 -- Geometry validation and repair
@@ -780,11 +766,12 @@ WHERE NOT ST_IsValid(geom);
 **Status**: ✅ **PostGIS is fully implemented and ready for spatial optimizations**
 
 ### Phase 3: Performance Monitoring Setup
-
-#### 3.1 Enable Query Logging
-```bash
-# Update PostgreSQL configuration
-docker exec -it visor_i2d_db psql -U i2d_user -d i2d_db -c "
+-- Spatial distance calculations
+SELECT codigo,
+       nombre,
+       ST_Area(geom::geography) AS area_m2
+FROM gbif_consultas.dpto_queries
+WHERE ST_Area(geom::geography) > 1000000;  -- Areas > 1M m²
 ALTER SYSTEM SET log_min_duration_statement = 1000;
 ALTER SYSTEM SET log_statement = 'all';
 ALTER SYSTEM SET log_duration = on;
@@ -956,18 +943,14 @@ Django GIS has been successfully integrated with full PostGIS support, enabling 
 
 ### Implementation Details
 
-#### Model Updates
-**Files Modified:**
-- `applications/dpto/models.py`
-- `applications/mupio/models.py`
+#### Current Model Implementation
+**Files Using PostGIS:**
+- `applications/dpto/models.py` - ✅ PostGIS GeometryField active
+- `applications/mupio/models.py` - ✅ PostGIS GeometryField active
 
-**Changes Made:**
+**Current Implementation:**
 ```python
-# Before
-from django.db import models
-geom = models.TextField(blank=True, null=True)
-
-# After  
+# PostGIS implementation already active
 from django.contrib.gis.db import models
 geom = models.GeometryField(blank=True, null=True)
 ```
@@ -975,7 +958,7 @@ geom = models.GeometryField(blank=True, null=True)
 #### Django Settings Configuration
 **Files Modified:**
 - `i2dbackend/settings/base.py`
-- `i2dbackend/settings/local.py` 
+- `i2dbackend/settings/local.py`
 - `i2dbackend/settings/prod.py`
 
 **Key Changes:**
@@ -1039,8 +1022,8 @@ print('Area:', sample.geom.area if sample.geom else 'No geometry')
 ```bash
 # Check PostGIS extension
 docker exec visor_i2d_db psql -U i2d_user -d i2d_db -c "
-SELECT name, default_version, installed_version 
-FROM pg_available_extensions 
+SELECT name, default_version, installed_version
+FROM pg_available_extensions
 WHERE name LIKE '%postgis%';
 "
 
