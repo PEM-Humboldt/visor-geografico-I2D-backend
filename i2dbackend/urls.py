@@ -9,6 +9,7 @@ from django.shortcuts import redirect
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from applications.common.health import health_check, health_check_simple, readiness_check, liveness_check
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -29,6 +30,12 @@ def redirect_to_admin(request):
 urlpatterns = [
     path('', redirect_to_admin, name='home'),
     path('admin/', admin.site.urls),
+    
+    # Health Check Endpoints
+    path('health/', health_check, name='health-check'),
+    path('health/simple/', health_check_simple, name='health-check-simple'),
+    path('health/ready/', readiness_check, name='readiness-check'),
+    path('health/live/', liveness_check, name='liveness-check'),
     
     # API Documentation
     path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

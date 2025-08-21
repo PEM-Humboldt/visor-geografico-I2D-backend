@@ -12,6 +12,52 @@ from rest_framework import status
 logger = logging.getLogger(__name__)
 
 
+class SecurityHeadersMiddleware(MiddlewareMixin):
+    """Middleware to add security headers to all responses"""
+    
+    def __init__(self, get_response):
+        self.get_response = get_response
+        super().__init__(get_response)
+    
+    def process_response(self, request, response):
+        """Add security headers to response"""
+        
+        # Content Security Policy
+        response['Content-Security-Policy'] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data: https:; "
+            "connect-src 'self' https://api.gbif.org; "
+            "frame-ancestors 'none';"
+        )
+        
+        # X-Frame-Options
+        response['X-Frame-Options'] = 'DENY'
+        
+        # X-Content-Type-Options
+        response['X-Content-Type-Options'] = 'nosniff'
+        
+        # X-XSS-Protection
+        response['X-XSS-Protection'] = '1; mode=block'
+        
+        # Referrer Policy
+        response['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        
+        # Permissions Policy
+        response['Permissions-Policy'] = (
+            "geolocation=(), microphone=(), camera=(), "
+            "payment=(), usb=(), magnetometer=(), gyroscope=()"
+        )
+        
+        # Server header removal
+        if 'Server' in response:
+            del response['Server']
+        
+        return response
+
+
 class DataQualityMiddleware(MiddlewareMixin):
     """Middleware for data quality checks and validation"""
     

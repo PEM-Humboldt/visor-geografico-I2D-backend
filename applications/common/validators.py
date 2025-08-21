@@ -217,6 +217,50 @@ gbif_validator = GBIFDataValidator()
 user_request_validator = UserRequestValidator()
 
 
+class CustomPasswordValidator:
+    """Enhanced password validator for production security"""
+    
+    def validate(self, password, user=None):
+        """Validate password strength"""
+        errors = []
+        
+        # Check minimum length
+        if len(password) < 12:
+            errors.append('Password must be at least 12 characters long')
+        
+        # Check for uppercase letter
+        if not re.search(r'[A-Z]', password):
+            errors.append('Password must contain at least one uppercase letter')
+        
+        # Check for lowercase letter
+        if not re.search(r'[a-z]', password):
+            errors.append('Password must contain at least one lowercase letter')
+        
+        # Check for digit
+        if not re.search(r'\d', password):
+            errors.append('Password must contain at least one digit')
+        
+        # Check for special character
+        if not re.search(r'[!@#$%^&*(),.?":{}|<>]', password):
+            errors.append('Password must contain at least one special character')
+        
+        # Check for common patterns
+        common_patterns = ['123', 'abc', 'password', 'admin', 'qwerty']
+        password_lower = password.lower()
+        for pattern in common_patterns:
+            if pattern in password_lower:
+                errors.append(f'Password cannot contain common pattern: {pattern}')
+        
+        if errors:
+            raise ValidationError(errors)
+    
+    def get_help_text(self):
+        return (
+            "Your password must contain at least 12 characters, including uppercase, "
+            "lowercase, digits, and special characters."
+        )
+
+
 def validate_query_parameters(params_dict, required_params=None, optional_params=None):
     """
     Validate query parameters for API endpoints
@@ -259,3 +303,48 @@ def validate_query_parameters(params_dict, required_params=None, optional_params
         raise ValidationError('; '.join(errors))
     
     return validated_params
+
+
+def sanitize_input(value, max_length=None, allow_html=False):
+    """
+    Sanitize user input to prevent XSS and injection attacks
+    
+    Args:
+        value: Input value to sanitize
+        max_length: Maximum allowed length
+        allow_html: Whether to allow HTML tags
+    
+    Returns:
+        str: Sanitized input
+    """
+    if not isinstance(value, str):
+        value = str(value)
+    
+    # Remove null bytes
+    value = value.replace('\x00', '')
+    
+    # Trim whitespace
+    value = value.strip()
+    
+    # Check length
+    if max_length and len(value) > max_length:
+        raise ValidationError(f'Input exceeds maximum length of {max_length} characters')
+    
+    # Remove or escape HTML if not allowed
+    if not allow_html:
+        import html
+        value = html.escape(value)
+    
+    # Remove potentially dangerous patterns
+    dangerous_patterns = [
+        r'<script[^>]*>.*?</script>',
+        r'javascript:',
+        r'data:',
+        r'vbscript:',
+        r'on\w+\s*=',
+    ]
+    
+    for pattern in dangerous_patterns:
+        value = re.sub(pattern, '', value, flags=re.IGNORECASE | re.DOTALL)
+    
+    return value
