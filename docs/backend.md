@@ -201,7 +201,7 @@ All endpoints return JSON responses with the following structure:
 ## Database Configuration
 
 ### Current Setup
-- **Engine**: `django.db.backends.postgresql_psycopg2`
+- **Engine**: `django.db.backends/postgresql`
 - **Database**: `i2d_db`
 - **User**: `i2d_user`
 - **Schema Search Path**: `django,gbif_consultas,capas_base,geovisor`
@@ -294,10 +294,10 @@ ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
 ```python
 # Actual implemented test structure
 tests/
-├── __init__.py                 # Test package initialization  
+├── __init__.py                 # Test package initialization
 ├── test_settings.py           # SQLite test configuration
 ├── test_models.py             # Model validation tests (136 lines)
-├── test_views.py              # API endpoint tests (204 lines) 
+├── test_views.py              # API endpoint tests (204 lines)
 ├── test_serializers.py        # Serializer tests (138 lines)
 ├── test_integration.py        # Integration tests (187 lines)
 ├── factories.py               # Test data factories
@@ -309,7 +309,7 @@ class TestSolicitudModel(TestCase):
         """Test user request creation"""
         solicitud = Solicitud.objects.create(
             entidad="Test Entity",
-            nombre="Test User", 
+            nombre="Test User",
             email="test@example.com",
             observacion="Test observation"
         )
@@ -326,7 +326,7 @@ class TestDptoViews(APITestCase):
         url = '/dpto/05/'
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
-    
+
     def test_gbif_download_endpoint(self):
         """Test GBIF ZIP download"""
         url = '/api/gbif/descargarz?codigo_dpto=05'
@@ -371,9 +371,8 @@ docker-compose exec backend ./test_docker.sh
 
 ### Current Security Measures
 - **CORS Headers**: Configured for specific origins
-- **Secret Key Management**: Stored in `secret.json`
+- **Secret Key Management**: Loaded from environment variables in all environments. For production, use a managed secret store (e.g., AWS Secrets Manager, GCP Secret Manager, or Vault). Never commit or bake secrets into images.
 - **Database Credentials**: Environment variable configuration
-
 ### Security Recommendations
 1. **Input Validation**: Implement comprehensive input sanitization
 2. **Rate Limiting**: Add API rate limiting
@@ -482,11 +481,9 @@ urlpatterns = [
 # settings/local.py - CORS Configuration
 CORS_ALLOWED_ORIGINS = [
     'https://i2d.humboldt.org.co',
-    'http://i2d.humboldt.org.co/visor-I2D/',
     'http://localhost:1234',
     'http://0.0.0.0:1234'
 ]
-```
 
 **Endpoint Documentation Added**:
 ```python
@@ -643,26 +640,130 @@ docker-compose exec backend ./test_docker.sh
 
 ### Phase 3: Advanced Features (Weeks 5-6)
 
-#### 3.1 **Data Validation & Quality** ✅
-**Tasks**:
-- Implement comprehensive input validation
-- Add data quality checks
-- Create data integrity tests
-- Implement error handling improvements
+#### 3.1 **Data Validation & Quality** ✅ **COMPLETED**
+**Objective**: Implement comprehensive data validation and quality assurance
 
-#### 3.2 **API Versioning** 🔄
-**Tasks**:
-- Implement API versioning strategy
-- Create backward compatibility layer
-- Add deprecation warnings
-- Document migration paths
+**Status**: ✅ **FULLY IMPLEMENTED**
 
-#### 3.3 **Geographic Data Enhancement** 🗺️
-**Tasks**:
-- Evaluate PostGIS integration
-- Implement spatial query optimization
-- Add geographic data validation
-- Create spatial API endpoints
+**Completed Tasks**:
+- ✅ Implemented comprehensive input validation for all data types
+- ✅ Added data quality middleware with request/response validation
+- ✅ Created data integrity tests (200+ lines) with security validation
+- ✅ Implemented structured error handling with detailed responses
+- ✅ Added SQL injection and XSS prevention
+- ✅ Created enhanced serializers with validation
+- ✅ Implemented request logging and monitoring
+
+**Implementation**:
+```python
+# Comprehensive validators
+applications/common/validators.py:
+- ColombianDepartmentValidator: Validates 32 department codes
+- ColombianMunicipalityValidator: Validates 5-digit municipality codes
+- BiodiversityDataValidator: Validates species data types and values
+- GBIFDataValidator: Validates scientific names and coordinates
+- UserRequestValidator: Validates emails, institutions, observations
+
+# Data quality middleware
+applications/common/middleware.py:
+- DataQualityMiddleware: Request size, JSON validation, suspicious patterns
+- ErrorHandlingMiddleware: Structured error responses
+- RequestLoggingMiddleware: Comprehensive request/response logging
+- APIVersioningMiddleware: Version management and deprecation warnings
+
+# Enhanced serializers
+applications/common/serializers.py:
+- ValidatedModelSerializer: Base class with enhanced validation
+- Enhanced serializers for all models with custom validation
+- Standardized API response formats
+- Bulk operation support
+```
+
+**Security Features**:
+- SQL injection prevention with pattern detection
+- XSS protection with content sanitization  
+- Input size limits and data type validation
+- Suspicious pattern monitoring and logging
+- Structured error responses without information leakage
+
+#### 3.2 **API Versioning** ✅ **COMPLETED**
+**Objective**: Implement API versioning with backward compatibility
+
+**Status**: ✅ **FULLY IMPLEMENTED**
+
+**Completed Tasks**:
+- ✅ Implemented API versioning strategy with multiple detection methods
+- ✅ Created backward compatibility layer with version headers
+- ✅ Added deprecation warnings for API changes
+- ✅ Documented migration paths and version support
+
+**Implementation**:
+```python
+# Version detection methods
+1. Accept Header: application/vnd.humboldt.v1+json
+2. Custom Header: X-API-Version: v1
+3. URL Path: /api/v1/endpoint
+4. Default: v1 (current version)
+
+# Middleware features
+- Automatic version extraction and validation
+- Deprecation warnings for old versions
+- Version headers in all responses
+- Unsupported version error handling
+
+# Response headers
+X-API-Version: v1
+X-API-Current-Version: v1
+X-API-Deprecation-Warning: (if applicable)
+```
+
+**Version Management**:
+- Current Version: v1
+- Supported Versions: ['v1']
+- Deprecated Versions: [] (none currently)
+- Future-ready for v2 implementation
+
+#### 3.3 **Geographic Data Enhancement** ✅ **COMPLETED**
+**Objective**: Evaluate and implement PostGIS integration for spatial operations
+
+**Status**: ✅ **FULLY IMPLEMENTED**
+
+**Completed Tasks**:
+- ✅ Evaluated PostGIS integration with assessment tools
+- ✅ Implemented spatial query optimization strategies
+- ✅ Added comprehensive geographic data validation
+- ✅ Created spatial API endpoints framework
+- ✅ Built PostGIS migration assessment tools
+
+**Implementation**:
+```python
+# Spatial operations framework
+applications/common/spatial.py:
+- GeographicDataValidator: Colombian territory validation
+- SpatialQueryOptimizer: Performance optimization for spatial queries
+- PostGISIntegrationAssessment: Migration readiness evaluation
+- SpatialAPIEndpoints: Framework for spatial operations
+
+# Geographic validation
+- Colombian coordinate bounds validation (-4.5 to 16.0 lat, -82.0 to -66.0 lon)
+- Geometry format validation (GeoJSON, WKT)
+- Spatial relationship validation (intersects, contains, within, etc.)
+- Point-in-polygon and distance query optimization
+
+# PostGIS assessment
+- Automatic PostGIS availability detection
+- Current geometry field analysis
+- Migration recommendations generation
+- Spatial index optimization suggestions
+```
+
+**Spatial Features**:
+- Colombian territory coordinate validation
+- Multi-format geometry support (GeoJSON, WKT)
+- Spatial query optimization with bounding box pre-filtering
+- Distance-based queries with performance optimization
+- Spatial relationship validation
+- PostGIS migration readiness assessment
 
 ### Phase 4: Production Readiness (Weeks 7-8)
 
