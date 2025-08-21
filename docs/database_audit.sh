@@ -4,10 +4,7 @@
 # This script runs comprehensive database verification queries and exports results to markdown
 # Usage: ./database_audit.sh [output_file]
 
-# Fail-fast in pipelines, but don't exit on first non-zero command.
-set -o pipefail
-
-
+set -e
 
 # Configuration
 CONTAINER_NAME="visor_i2d_db"
@@ -62,8 +59,8 @@ execute_query() {
 
     # Start timing
     local start_time=$(date +%s.%N)
-    result=$(docker exec -i "$CONTAINER_NAME" psql -v ON_ERROR_STOP=1 -U "$DB_USER" -d "$DB_NAME" -t -A -F'|' -c "$query" 2>&1)
-    local exit_code=$?
+
+    # Execute query and capture output
     local result
     result=$(docker exec -i "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -t -A -F'|' -c "$query" 2>&1)
     local exit_code=$?
@@ -120,15 +117,13 @@ execute_query() {
 # Function to execute backend application query with sample parameters
 execute_backend_query() {
     local base_query="$1"
-    local sample_param="${5:-01}"  # Default sample parameter (unquoted)
+    local description="$2"
+    local file_location="$3"
+    local query_purpose="$4"
+    local sample_param="${5:-'01'}"  # Default sample parameter
 
-    # Replace parameter placeholder with safely-escaped single-quoted value
-    local escaped_param
-    escaped_param=$(printf "%s" "$sample_param" | sed -e 's/[\/&]/\\&/g' -e "s/'/''/g")
-    local query="${base_query//%s/'$escaped_param'}"
-
-    execute_query "$query" "$description (Sample: $sample_param)" "$file_location" "$query_purpose"
-}
+    # Replace parameter placeholder with sample value
+    local query=$(echo "$base_query" | sed "s/%s/'$sample_param'/g")
 
     execute_query "$query" "$description (Sample: $sample_param)" "$file_location" "$query_purpose"
 }
@@ -188,7 +183,13 @@ If any queries failed, check:
 ---
 
 **Report End:** $(date '+%Y-%m-%d %H:%M:%S')
+EOF
+}
+
+# Main execution
+main() {
     print_header "Starting Database Audit for Visor I2D"
+    print_status "Output file: $OUTPUT_FILE"
 
     # Set output file with timestamp if not provided
     if [ -z "$1" ]; then
@@ -196,12 +197,6 @@ If any queries failed, check:
     else
         OUTPUT_FILE="$1"
         # If output file starts with "docs/" and we're already in docs directory, remove the prefix
-        if [[ "$OUTPUT_FILE" == docs/* ]] && [[ "$(basename "$PWD")" == "docs" ]]; then
-            OUTPUT_FILE="${OUTPUT_FILE#docs/}"
-        fi
-    fi
-
-    print_status "Output file: $OUTPUT_FILE"
         if [[ "$OUTPUT_FILE" == docs/* ]] && [[ "$(basename "$PWD")" == "docs" ]]; then
             OUTPUT_FILE="${OUTPUT_FILE#docs/}"
         fi
@@ -273,22 +268,22 @@ If any queries failed, check:
     # Get sample parameters dynamically from database
     print_status "🔍 Getting sample parameters from database..."
 
-    # Get a sample department code with error handling
-    SAMPLE_DEPT=$(docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT codigo FROM gbif_consultas.dpto_queries WHERE codigo IS NOT NULL LIMIT 1;" 2>/dev/null | xargs || echo "")
+    # Get a sample department code
+    SAMPLE_DEPT=$(docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT codigo FROM gbif_consultas.dpto_queries WHERE codigo IS NOT NULL LIMIT 1;" 2>/dev/null | xargs)
     if [ -z "$SAMPLE_DEPT" ]; then
-        SAMPLE_DEPT="05"  # Fallback to Antioquia
+        SAMPLE_DEPT="05"  # Fallback
     fi
 
-    # Get a sample municipality code with error handling
-    SAMPLE_MPIO=$(docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT codigo FROM gbif_consultas.mpio_queries WHERE codigo IS NOT NULL LIMIT 1;" 2>/dev/null | xargs || echo "")
+    # Get a sample municipality code
+    SAMPLE_MPIO=$(docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT codigo FROM gbif_consultas.mpio_queries WHERE codigo IS NOT NULL LIMIT 1;" 2>/dev/null | xargs)
     if [ -z "$SAMPLE_MPIO" ]; then
-        SAMPLE_MPIO="05001"  # Fallback to Medellín
+        SAMPLE_MPIO="05001"  # Fallback
     fi
 
-    # Get a sample municipality name for search with error handling
-    SAMPLE_MPIO_NAME=$(docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT SUBSTRING(nombre, 1, 5) FROM capas_base.mpio_politico WHERE nombre IS NOT NULL LIMIT 1;" 2>/dev/null | xargs || echo "")
+    # Get a sample municipality name for search
+    SAMPLE_MPIO_NAME=$(docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT SUBSTRING(nombre, 1, 5) FROM capas_base.mpio_politico WHERE nombre IS NOT NULL LIMIT 1;" 2>/dev/null | xargs)
     if [ -z "$SAMPLE_MPIO_NAME" ]; then
-        SAMPLE_MPIO_NAME="Medell"  # Fallback for Medellín search
+        SAMPLE_MPIO_NAME="Medell"  # Fallback
     fi
 
     print_status "📊 Using sample parameters: Dept=$SAMPLE_DEPT, Mpio=$SAMPLE_MPIO, Search=$SAMPLE_MPIO_NAME"
@@ -308,18 +303,18 @@ If any queries failed, check:
     # Backend Query 5: GBIF Information
     execute_query "SELECT id, download_date, doi FROM gbif_consultas.gbif_info LIMIT 10;" "GBIF Information Retrieval" "applications/gbif/views.py:19-20" "Retrieve all GBIF download information and metadata"
 
-    # Backend Query 6: Municipality Search by Name (Accent-insensitive)
-    execute_query "SELECT codigo, nombre, nombre_unaccented, dpto_nombre FROM capas_base.mpio_politico WHERE nombre_unaccented ILIKE '%$SAMPLE_MPIO_NAME%' OR nombre ILIKE '%$SAMPLE_MPIO_NAME%' LIMIT 5;" "Municipality Search by Name (Sample: $SAMPLE_MPIO_NAME)" "applications/mupiopolitico/views.py:12-15" "Search municipalities by name with accent-insensitive matching"
+    # Backend Query 6: Municipality Search (with accent handling)
+    execute_query "SELECT codigo, dpto_nombre, nombre, nombre_unaccented FROM capas_base.mpio_politico WHERE (nombre ILIKE '%$SAMPLE_MPIO_NAME%' OR nombre_unaccented ILIKE '%$SAMPLE_MPIO_NAME%') LIMIT 5;" "Municipality Search by Name (Sample: $SAMPLE_MPIO_NAME)" "applications/mupiopolitico/views.py:13-15" "Search municipalities by name with accent handling"
 
     # Backend Query 7: Check if gbif.gbif table exists, if not use alternative
     GBIF_TABLE_EXISTS=$(docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'gbif' AND table_name = 'gbif');" 2>/dev/null | xargs)
 
     if [ "$GBIF_TABLE_EXISTS" = "t" ]; then
-        # Backend Query 7: GBIF Export Query (Municipality)
-        execute_query "SELECT COUNT(*) as total_records FROM gbif.gbif WHERE codigo_mpio = '$SAMPLE_MPIO' LIMIT 100000;" "GBIF Export Record Count (Sample Municipality: $SAMPLE_MPIO)" "applications/gbif/views.py:45-50" "Count biodiversity records for ZIP export by municipality"
+        # Backend Query 7: GBIF Records Export by Municipality
+        execute_query "SELECT codigo_mpio, codigo_dpto, reino, filo, clase, orden, familia, genero, especie, fecha_observacion, latitud, longitud FROM gbif.gbif WHERE codigo_mpio = '$SAMPLE_MPIO' LIMIT 10;" "GBIF Records Export by Municipality (Sample: $SAMPLE_MPIO)" "applications/gbif/views.py:52" "Export GBIF records for a specific municipality"
 
-        # Backend Query 8: GBIF Export Query (Department)
-        execute_query "SELECT COUNT(*) as total_records FROM gbif.gbif WHERE codigo_dpto = '$SAMPLE_DEPT' LIMIT 100000;" "GBIF Export Record Count (Sample Department: $SAMPLE_DEPT)" "applications/gbif/views.py:45-50" "Count biodiversity records for ZIP export by department"
+        # Backend Query 8: GBIF Records Export by Department
+        execute_query "SELECT codigo_mpio, codigo_dpto, reino, filo, clase, orden, familia, genero, especie, fecha_observacion, latitud, longitud FROM gbif.gbif WHERE codigo_dpto = '$SAMPLE_DEPT' LIMIT 10;" "GBIF Records Export by Department (Sample: $SAMPLE_DEPT)" "applications/gbif/views.py:52" "Export GBIF records for a specific department"
     else
         # Alternative queries using gbif_consultas schema
         execute_query "SELECT 'gbif.gbif table not found - using alternative query' as note, codigo, nombre, tipo, species, registers FROM gbif_consultas.mpio_queries WHERE codigo = '$SAMPLE_MPIO' LIMIT 10;" "GBIF Records Export by Municipality - Alternative (Sample: $SAMPLE_MPIO)" "applications/gbif/views.py:52" "Export GBIF records for a specific municipality (alternative query)"
@@ -331,11 +326,11 @@ If any queries failed, check:
     SPECIES_TABLE_EXISTS=$(docker exec "$CONTAINER_NAME" psql -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_schema = 'gbif' AND table_name = 'lista_especies_consulta');" 2>/dev/null | xargs)
 
     if [ "$SPECIES_TABLE_EXISTS" = "t" ]; then
-        # Backend Query 9: GBIF Species List Query (Municipality)
-        execute_query "SELECT DISTINCT reino, filo, clase, orden, familia, genero, especies, endemicas, amenazadas, exoticas FROM gbif.lista_especies_consulta WHERE codigo_mpio = '$SAMPLE_MPIO' LIMIT 10000;" "GBIF Species List (Sample Municipality: $SAMPLE_MPIO)" "applications/gbif/views.py:51-55" "Retrieve species list for ZIP export by municipality"
+        # Backend Query 9: Species List Export by Municipality
+        execute_query "SELECT DISTINCT reino, filo, clase, orden, familia, genero, especies, endemicas, amenazadas, exoticas FROM gbif.lista_especies_consulta WHERE codigo_mpio = '$SAMPLE_MPIO' LIMIT 10;" "Species List Export by Municipality (Sample: $SAMPLE_MPIO)" "applications/gbif/views.py:53-56" "Export distinct species list for a municipality"
 
-        # Backend Query 10: GBIF Species List Query (Department)
-        execute_query "SELECT DISTINCT reino, filo, clase, orden, familia, genero, especies, endemicas, amenazadas, exoticas FROM gbif.lista_especies_consulta WHERE codigo_dpto = '$SAMPLE_DEPT' LIMIT 10000;" "GBIF Species List (Sample Department: $SAMPLE_DEPT)" "applications/gbif/views.py:51-55" "Retrieve species list for ZIP export by department"
+        # Backend Query 10: Species List Export by Department
+        execute_query "SELECT DISTINCT reino, filo, clase, orden, familia, genero, especies, endemicas, amenazadas, exoticas FROM gbif.lista_especies_consulta WHERE codigo_dpto = '$SAMPLE_DEPT' LIMIT 10;" "Species List Export by Department (Sample: $SAMPLE_DEPT)" "applications/gbif/views.py:53-56" "Export distinct species list for a department"
     else
         # Alternative queries using available data
         execute_query "SELECT 'gbif.lista_especies_consulta table not found - using alternative query' as note, codigo, nombre, tipo, species, endemicas, exoticas FROM gbif_consultas.mpio_queries WHERE codigo = '$SAMPLE_MPIO' LIMIT 10;" "Species List Export by Municipality - Alternative (Sample: $SAMPLE_MPIO)" "applications/gbif/views.py:53-56" "Export distinct species list for a municipality (alternative query)"
@@ -358,13 +353,13 @@ If any queries failed, check:
     # Display quick summary
     echo ""
     print_header "Quick Summary:"
-    echo "� Infrastructure queries: 14"
-    echo "� Backend queries tested: 12"
-    echo "⚡ Performance timing: Enabled"
-}
+    echo "📄 Report file: $OUTPUT_FILE"
+    echo "🐳 Container: $CONTAINER_NAME"
+    echo "🗄️  Database: $DB_NAME"
+    echo "👤 User: $DB_USER"
     echo "⏰ Generated: $TIMESTAMP"
     echo "🔍 Infrastructure queries: 14"
-    echo "🚀 Backend queries tested: 12"
+    echo "🚀 Backend queries tested: 10"
     echo "⚡ Performance timing: Enabled"
 }
 
@@ -381,13 +376,13 @@ Arguments:
 
 Examples:
   $0                                    # Use default filename
-- Execute comprehensive database verification queries (14 queries)
-- Test backend application queries with sample parameters (12 queries)
-- Measure execution time for all queries in milliseconds
+  $0 audit_report.md                   # Custom filename
+  $0 docs/database_audit_latest.md     # Custom path and filename
+
 This script will:
 - Verify the PostgreSQL container is running
 - Execute comprehensive database verification queries (14 queries)
-- Test backend application queries with sample parameters (12 queries)
+- Test backend application queries with sample parameters (10 queries)
 - Measure execution time for all queries in milliseconds
 - Export results to a formatted markdown report
 - Provide troubleshooting information
