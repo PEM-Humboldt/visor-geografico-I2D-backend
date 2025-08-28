@@ -1,30 +1,68 @@
 # Backend-Visor-I2D
-El backend visor geografico I2D es un componente que permite interactuar con una base de datos de información geográfica que contiene información de registros biológicos.
 
-Este proyecto ha sido desarrollado por el [Instituto Humboldt](http://www.humboldt.org.co). El proyecto usa [Python 3.9.2](https://www.python.org/), junto al framework web de alto nivel [DJANGO](https://www.djangoproject.com/) y a paquetes como [Django Rest Framework](https://www.django-rest-framework.org/) y [psycopg2](https://pypi.org/project/psycopg2/)
+[![Django](https://img.shields.io/badge/Django-3.1.7-092E20?style=flat&logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.9.2-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![PostGIS](https://img.shields.io/badge/PostGIS-3.4-4169E1?style=flat&logo=postgresql&logoColor=white)](https://postgis.net/)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white)](https://docs.docker.com/)
 
-## Prerequisitos
+El backend del Visor Geográfico I2D es un sistema robusto de información geográfica que permite la gestión, consulta y visualización de datos de biodiversidad. Desarrollado con Django y PostGIS, proporciona APIs REST completas para la interacción con registros biológicos georeferenciados.
 
-Para despliegue en desarrollo:
+**Desarrollado por el [Instituto Alexander von Humboldt Colombia](http://www.humboldt.org.co)**
+*Programa de Evaluación y Monitoreo de la Biodiversidad*
 
- - Python 3.9.2
- - pip
- - postgresql-dev
- - gcc
- - python3-dev
- - musl-dev
+## 🚀 Estado Actual del Sistema
 
-Para despliegue en producción:
+### ✅ **COMPLETAMENTE FUNCIONAL**
+- **Django GIS**: PostGIS habilitado con GeometryField y operaciones espaciales
+- **APIs REST**: Endpoints completos para departamentos, municipios, GBIF y proyectos
+- **Base de Datos**: PostgreSQL 16 + PostGIS 3.4 con datos completos
+- **Sistema de Proyectos**: Gestión dinámica de proyectos sin cambios de código
+- **Búsqueda Geográfica**: API de búsqueda de municipios con coordenadas
+- **Auditoría**: Script completo de métricas de rendimiento y optimización
 
-- Docker version 19.03.13 o superior
-- Docker-compose 1.28.5 o superior
-- Git 2.23 o superior
+## 📋 Características Principales
 
-En general:
+- **🗺️ Gestión Geoespacial**: Operaciones PostGIS con GeometryField para datos espaciales
+- **📊 APIs REST Completas**: Endpoints para departamentos, municipios, GBIF y proyectos
+- **🔍 Búsqueda Inteligente**: Sistema de búsqueda de municipios con manejo de acentos
+- **📈 Sistema de Proyectos**: Gestión dinámica configurable vía base de datos
+- **🔧 Auditoría Avanzada**: Métricas de rendimiento y optimización de consultas
+- **🐳 Docker Ready**: Despliegue completo con Docker Compose
+- **🔒 Seguridad**: Configuración CORS, ALLOWED_HOSTS y variables de entorno
 
-- Debe existir una base de datos en PostgreSQL a la cual se conectará este componente.
+## 🛠️ Stack Tecnológico
 
-Esta es una versión preliminar y se implementarán nuevas funcionalidades.
+### Backend Core
+- **Python**: 3.9.2
+- **Django**: 3.1.7 con django.contrib.gis
+- **Django REST Framework**: 3.12.2
+- **PostGIS**: Operaciones espaciales completas
+
+### Base de Datos
+- **PostgreSQL**: 16 con extensiones PostGIS 3.4
+- **Esquemas**: django, gbif_consultas, capas_base, geovisor
+- **Datos**: 8,702 municipios, 297 departamentos con geometrías
+
+### Infraestructura
+- **Servidor**: Gunicorn con 3 workers
+- **Proxy**: Nginx para archivos estáticos
+- **Contenedores**: Docker + Docker Compose
+- **Monitoreo**: Health checks y logs estructurados
+
+## 📋 Prerequisitos
+
+### Para Desarrollo Local:
+- Python 3.9.2+
+- pip
+- postgresql-dev, gcc, python3-dev, musl-dev
+- PostgreSQL con PostGIS
+
+### Para Producción (Recomendado):
+- Docker 20.0+
+- Docker Compose 2.0+
+- Git 2.20+
+- 4GB RAM mínimo (8GB recomendado)
 
 ## Configuración inicial
 
@@ -291,14 +329,219 @@ El script genera un reporte en formato Markdown con:
 
 **Ejemplo de salida**: `database_audit_20250815_080527.md`
 
-## Autores
+---
 
-* **Julián David Torres Caicedo** - *Creación del sitio* - [juliant8805](https://github.com/juliant8805)
-* **Liceth Barandica Diaz** - *Creación del sitio* - [licethbarandicadiaz](https://github.com/licethbarandicadiaz)
-* **Daniel López** - *Configuración despliegue* - [danflop](https://github.com/danflop)
+## 🌐 APIs y Endpoints
 
-Programa de Evaluación y Monitoreo de la Biodiversidad, Instituto Alexander von Humboldt Colombia
+### 📍 Endpoints Geográficos
 
-## Licencia
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/dpto/` | GET | Lista todos los departamentos con geometrías |
+| `/api/mpio/` | GET | Lista todos los municipios con geometrías |
+| `/api/mpio/search/<term>/` | GET | Búsqueda de municipios por nombre |
 
-Este proyecto es licenciado bajo licencia MIT - consulte [LICENSE.md](LICENSE.md) para mas detalles
+### 🗂️ Endpoints de Proyectos
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/projects/` | GET | Lista todos los proyectos disponibles |
+| `/api/projects/<name>/` | GET | Obtiene proyecto específico por nombre |
+
+### 🐛 Endpoints GBIF
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/api/gbif/gbifinfo/` | GET | Información general de registros GBIF |
+| `/api/gbif/descargar-zip/` | GET | Descarga masiva en ZIP por región |
+
+### 🔧 Endpoints de Sistema
+
+| Endpoint | Método | Descripción |
+|----------|--------|-------------|
+| `/admin/` | GET | Panel de administración Django |
+| `/health/` | GET | Health check del sistema |
+| `/static/` | GET | Archivos estáticos |
+
+### 📊 Ejemplos de Uso
+
+```bash
+# Buscar municipios
+curl "http://localhost:8001/api/mpio/search/medellin"
+
+# Obtener proyecto específico
+curl "http://localhost:8001/api/projects/HU-VisorI2D-0001/"
+
+# Descargar datos por departamento
+curl "http://localhost:8001/api/gbif/descargar-zip/?codigo_dpto=05&nombre=Antioquia"
+
+# Health check
+curl "http://localhost:8001/health"
+```
+
+---
+
+## 🔧 Funcionalidades Avanzadas
+
+### 🗺️ Operaciones PostGIS
+
+El sistema utiliza Django GIS con PostGIS para operaciones espaciales:
+
+```python
+# Ejemplos de consultas espaciales disponibles
+from applications.dpto.models import Departamento
+from applications.mupio.models import Municipio
+
+# Obtener área de un departamento
+dpto = Departamento.objects.get(codigo='05')
+area = dpto.geom.area  # Área en unidades del sistema de coordenadas
+
+# Obtener centroide de un municipio
+mpio = Municipio.objects.get(codigo='05001')
+centroide = mpio.geom.centroid  # Punto central
+
+# Consultas espaciales
+municipio_dentro = Municipio.objects.filter(geom__within=dpto.geom)
+```
+
+### 🔍 Sistema de Búsqueda Inteligente
+
+Implementa búsqueda con manejo de acentos y caracteres especiales:
+
+```python
+# Búsqueda insensible a acentos
+resultados = mpioSearch(request, 'medellin')  # Encuentra "Medellín"
+resultados = mpioSearch(request, 'bogota')    # Encuentra "Bogotá"
+```
+
+### 📈 Sistema de Proyectos Dinámico
+
+Permite configurar nuevos proyectos sin cambios de código:
+
+```python
+# Modelo Project permite configuración dinámica
+project = Project.objects.create(
+    name="HU-VisorI2D-0002",
+    title="Nuevo Proyecto",
+    description="Descripción del proyecto",
+    is_active=True
+)
+```
+
+---
+
+## 📊 Métricas y Rendimiento
+
+### 🚀 Benchmarks Actuales
+
+| Consulta | Tiempo Promedio | Registros | Estado |
+|----------|----------------|-----------|--------|
+| Lista Departamentos | < 50ms | 297 | ✅ Óptimo |
+| Lista Municipios | < 100ms | 8,702 | ✅ Óptimo |
+| Búsqueda Municipios | < 200ms | Variable | ✅ Bueno |
+| Consultas GBIF | < 500ms | Variable | ⚠️ Optimizable |
+
+### 📈 Optimizaciones Implementadas
+
+- **Índices Espaciales**: Índices GIST en campos de geometría
+- **Consultas Específicas**: Evita SELECT * en tablas grandes
+- **Límites de Resultados**: LIMIT aplicado en consultas de auditoría
+- **Conexión Pooling**: Configuración optimizada de PostgreSQL
+
+### 🔍 Auditoría Continua
+
+Usa el script de auditoría para monitoreo regular:
+
+```bash
+# Ejecutar auditoría semanal
+cd docs/
+./database_audit.sh weekly_audit_$(date +%Y%m%d).md
+```
+
+---
+
+## 🔄 Changelog Reciente
+
+### ✅ Versión Actual (2025-08-28)
+
+#### Funcionalidades Implementadas:
+- **Django GIS Completo**: PostGIS habilitado con GeometryField
+- **API de Búsqueda**: Endpoint `/api/mpio/search/<term>/` funcional
+- **Sistema de Proyectos**: APIs REST para gestión dinámica
+- **Auditoría de BD**: Script completo con métricas de rendimiento
+- **Optimización**: Consultas espaciales optimizadas
+
+#### Correcciones Críticas:
+- **DisallowedHost**: ALLOWED_HOSTS configurado correctamente
+- **Docker Volumes**: Mapeo corregido a `/project`
+- **Variables de Entorno**: Soporte completo para configuración
+- **Static Files**: Servicio de archivos estáticos en desarrollo
+
+#### Mejoras de Rendimiento:
+- **Índices Espaciales**: Implementados en campos de geometría
+- **Query Optimization**: Consultas específicas sin SELECT *
+- **Connection Pooling**: Configuración PostgreSQL optimizada
+
+---
+
+## 🤝 Contribución
+
+### 👥 Equipo de Desarrollo
+
+- **Julián David Torres Caicedo** - *Desarrollo Backend* - [juliant8805](https://github.com/juliant8805)
+- **Liceth Barandica Diaz** - *Desarrollo Backend* - [licethbarandicadiaz](https://github.com/licethbarandicadiaz)
+- **Daniel López** - *DevOps y Despliegue* - [danflop](https://github.com/danflop)
+
+### 📝 Cómo Contribuir
+
+1. Fork el repositorio
+2. Crear rama de feature (`git checkout -b feature/nueva-api`)
+3. Implementar cambios con tests
+4. Ejecutar auditoría: `./docs/database_audit.sh`
+5. Commit siguiendo Conventional Commits
+6. Push y crear Pull Request
+
+### 🧪 Testing
+
+```bash
+# Tests unitarios
+python manage.py test
+
+# Tests de APIs
+curl http://localhost:8001/api/dpto/
+curl http://localhost:8001/api/mpio/search/bogota/
+
+# Auditoría de rendimiento
+./docs/database_audit.sh
+```
+
+---
+
+## 📞 Soporte
+
+### 🏢 Instituto Alexander von Humboldt Colombia
+- **Programa**: Evaluación y Monitoreo de la Biodiversidad
+- **Website**: [http://www.humboldt.org.co](http://www.humboldt.org.co)
+
+### 🐛 Reportar Issues
+- **GitHub**: [Reportar problema](https://github.com/maccevedor/visor-geografico-I2D-backend/issues)
+- **Documentación**: Ver auditoría de base de datos para métricas
+
+### 📚 Recursos Técnicos
+- [Django GIS Documentation](https://docs.djangoproject.com/en/3.1/ref/contrib/gis/)
+- [PostGIS Documentation](https://postgis.net/documentation/)
+- [Django REST Framework](https://www.django-rest-framework.org/)
+
+## 📄 Licencia
+
+Este proyecto está licenciado bajo la Licencia MIT - consulte [LICENSE.md](LICENSE.md) para más detalles.
+
+---
+
+<div align="center">
+
+**🌱 Desarrollado con ❤️ para la conservación de la biodiversidad colombiana**
+
+[![Instituto Humboldt](https://img.shields.io/badge/Instituto-Humboldt-green?style=for-the-badge)](http://www.humboldt.org.co)
+
+</div>

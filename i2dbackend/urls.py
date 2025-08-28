@@ -50,6 +50,7 @@ urlpatterns = [
     re_path('',include('applications.mupiopolitico.urls')),
     re_path('',include('applications.gbif.urls')),
     re_path('',include('applications.user.urls')),
+    re_path('',include('applications.projects.urls')),
 ]
 
 # Serve static files during development
