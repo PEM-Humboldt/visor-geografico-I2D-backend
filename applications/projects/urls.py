@@ -9,5 +9,5 @@ router.register(r'layer-groups', LayerGroupViewSet)
 router.register(r'layers', LayerViewSet)
 
 urlpatterns = [
-    path('api/', include(router.urls)),
+    path('', include(router.urls)),
 ]

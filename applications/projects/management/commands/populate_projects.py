@@ -143,82 +143,64 @@ class Command(BaseCommand):
             )
 
     def create_ecoreservas_project_layers(self, project):
-        """Create layer groups and layers for ecoreservas project"""
+        """Create comprehensive layer groups and layers for ecoreservas project based on layers.js"""
         
-        # Preservación - Compensación group
-        comp_preservacion_group, _ = LayerGroup.objects.get_or_create(
-            proyecto=project,
-            nombre='Preservación',
-            defaults={'orden': 1, 'fold_state': 'close'}
-        )
-        
-        preservacion_comp_layers = [
-            ('Preservación_priorizando_todos_los_enfoques_Compensación', 'Todos los enfoques de costos-Inversión en compensación', 'ecoreservas', True, '4eca511b-d4db-49bc-8efa-a1f20e7c45ac'),
-            ('Preservación_priorizando_Costos_de_Oportunidad_Compensación', 'Costos de oportunidad-Inversión en compensación', 'ecoreservas', False, '4eca511b-d4db-49bc-8efa-a1f20e7c45ac'),
-            ('Preservación_priorizando_Costos_Abióticos_Compensación', 'Costos ecológicos-Inversión en compensación', 'ecoreservas', False, '4eca511b-d4db-49bc-8efa-a1f20e7c45ac'),
+        # All ecoreservas layers from the original layers.js
+        ecoreservas_groups = [
+            {
+                'name': 'Preservación - Compensación',
+                'orden': 1,
+                'layers': [
+                    ('Preservación_priorizando_todos_los_enfoques_Inversión_no_menos_1_', 'Todos los enfoques de costos-Inversión en compensación', True),
+                    ('Preservación_priorizando_Costos_de_Oportunidad_Inversión_no_menos_1_', 'Costos de oportunidad-Inversión en compensación', False),
+                    ('Preservación_priorizando_Costos_Abióticos_Inversión_no_menos_1_', 'Costos ecológicos-Inversión en compensación', False),
+                ]
+            },
+            {
+                'name': 'Restauración - Compensación', 
+                'orden': 2,
+                'layers': [
+                    ('Restauración_priorizando_todos_los_enfoques_Compensación', 'Todos los enfoques de costos-Inversión en compensación', False),
+                    ('Restauración_priorizando_Costos_de_Oportunidad_Compensación', 'Costos de oportunidad-Inversión en compensación', False),
+                    ('Restauración_priorizando_Costos_Abióticos_Compensación', 'Costos ecológicos-Inversión en compensación', False),
+                ]
+            },
+            {
+                'name': 'Uso Sostenible - Compensación',
+                'orden': 3, 
+                'layers': [
+                    ('Uso_Sostenible_priorizando_todos_los_enfoques_Compensación', 'Todos los enfoques de costos-Inversión en compensación', False),
+                    ('Uso_Sostenible_priorizando_Costos_de_Oportunidad_Compensación', 'Costos de oportunidad-Inversión en compensación', False),
+                    ('Uso_Sostenible_priorizando_Costos_Abióticos_Compensación', 'Costos ecológicos-Inversión en compensación', False),
+                ]
+            },
+            {
+                'name': 'Preservación - Inversión Voluntaria',
+                'orden': 4,
+                'layers': [
+                    ('Preservación_priorizando_todos_los_enfoques_Inversión_Voluntaria', 'Todos los enfoques de costos-Inversiones voluntarias', False),
+                    ('Preservación_riorizando_Costos_de_Oportunidad_Inversión_Voluntaria', 'Costos de oportunidad-Inversiones voluntarias', False),
+                    ('Preservación_priorizando_Costos_Abióticos_Inversión_Voluntaria', 'Costos ecológicos-Inversiones voluntarias', False),
+                ]
+            }
         ]
         
-        for i, (geoserver_name, display_name, store, initial_state, metadata_id) in enumerate(preservacion_comp_layers):
-            Layer.objects.get_or_create(
-                grupo=comp_preservacion_group,
-                nombre_geoserver=geoserver_name,
-                defaults={
-                    'nombre_display': display_name,
-                    'store_geoserver': store,
-                    'estado_inicial': initial_state,
-                    'metadata_id': metadata_id,
-                    'orden': i
-                }
+        for group_data in ecoreservas_groups:
+            group, _ = LayerGroup.objects.get_or_create(
+                proyecto=project,
+                nombre=group_data['name'],
+                defaults={'orden': group_data['orden'], 'fold_state': 'close'}
             )
-
-        # Restauración - Compensación group
-        comp_restauracion_group, _ = LayerGroup.objects.get_or_create(
-            proyecto=project,
-            nombre='Restauración',
-            defaults={'orden': 2, 'fold_state': 'close'}
-        )
-        
-        restauracion_comp_layers = [
-            ('Restauración_priorizando_todos_los_enfoques_Compensación', 'Todos los enfoques de costos-Inversión en compensación', 'ecoreservas', False, '4eca511b-d4db-49bc-8efa-a1f20e7c45ac'),
-            ('Restauración_priorizando_Costos_de_Oportunidad_Compensación', 'Costos de oportunidad-Inversión en compensación', 'ecoreservas', False, '4eca511b-d4db-49bc-8efa-a1f20e7c45ac'),
-            ('Restauración_priorizando_Costos_Abióticos_Compensación', 'Costos ecológicos-Inversión en compensación', 'ecoreservas', False, '4eca511b-d4db-49bc-8efa-a1f20e7c45ac'),
-        ]
-        
-        for i, (geoserver_name, display_name, store, initial_state, metadata_id) in enumerate(restauracion_comp_layers):
-            Layer.objects.get_or_create(
-                grupo=comp_restauracion_group,
-                nombre_geoserver=geoserver_name,
-                defaults={
-                    'nombre_display': display_name,
-                    'store_geoserver': store,
-                    'estado_inicial': initial_state,
-                    'metadata_id': metadata_id,
-                    'orden': i
-                }
-            )
-
-        # Uso Sostenible - Compensación group
-        comp_uso_group, _ = LayerGroup.objects.get_or_create(
-            proyecto=project,
-            nombre='Uso Sostenible',
-            defaults={'orden': 3, 'fold_state': 'close'}
-        )
-        
-        uso_comp_layers = [
-            ('Uso_Sostenible_priorizando_todos_los_enfoques_Compensación', 'Todos los enfoques de costos-Inversión en compensación', 'ecoreservas', False, '4eca511b-d4db-49bc-8efa-a1f20e7c45ac'),
-            ('Uso_Sostenible_priorizando_Costos_de_Oportunidad_Compensación', 'Costos de oportunidad-Inversión en compensación', 'ecoreservas', False, '4eca511b-d4db-49bc-8efa-a1f20e7c45ac'),
-            ('Uso_Sostenible_priorizando_Costos_Abióticos_Compensación', 'Costos ecológicos-Inversión en compensación', 'ecoreservas', False, '4eca511b-d4db-49bc-8efa-a1f20e7c45ac'),
-        ]
-        
-        for i, (geoserver_name, display_name, store, initial_state, metadata_id) in enumerate(uso_comp_layers):
-            Layer.objects.get_or_create(
-                grupo=comp_uso_group,
-                nombre_geoserver=geoserver_name,
-                defaults={
-                    'nombre_display': display_name,
-                    'store_geoserver': store,
-                    'estado_inicial': initial_state,
-                    'metadata_id': metadata_id,
-                    'orden': i
-                }
-            )
+            
+            for i, (geoserver_name, display_name, initial_state) in enumerate(group_data['layers']):
+                Layer.objects.get_or_create(
+                    grupo=group,
+                    nombre_geoserver=geoserver_name,
+                    defaults={
+                        'nombre_display': display_name,
+                        'store_geoserver': 'ecoreservas',
+                        'estado_inicial': initial_state,
+                        'metadata_id': '4eca511b-d4db-49bc-8efa-a1f20e7c45ac',
+                        'orden': i
+                    }
+                )
