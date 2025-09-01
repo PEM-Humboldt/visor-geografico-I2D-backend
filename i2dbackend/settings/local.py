@@ -14,7 +14,7 @@ ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',')]
 DATABASES = {
     'default': {
 
-        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql_psycopg2'),
+        'ENGINE': os.getenv('DB_ENGINE', 'django.contrib.gis.db.backends.postgis'),
 
         'OPTIONS': {
             'options': os.getenv('DB_OPTIONS', '-c search_path=django,gbif_consultas,capas_base,geovisor')
@@ -39,7 +39,6 @@ MEDIA_ROOT = os.getenv('MEDIA_ROOT', '/app/media')
 
 
 # CORS settings
-CORS_ALLOWED_ORIGINS = [
-    origin.strip() for origin in os.getenv('CORS_ALLOWED_ORIGINS',
-        'https://i2d.humboldt.org.co,http://i2d.humboldt.org.co/visor-I2D/,http://localhost:1234,http://0.0.0.0:1234').split(',')
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://(localhost|127\.0\.0\.1)(:\d+)?$",
 ]

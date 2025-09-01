@@ -11,7 +11,7 @@ ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_env.split(',')]
 # Database configuration using environment variables
 DATABASES = {
     'default': {
-        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql_psycopg2'),
+        'ENGINE': os.getenv('DB_ENGINE', 'django.contrib.gis.db.backends.postgis'),
         'OPTIONS': {
             'options': os.getenv('DB_OPTIONS', '-c search_path=django,gbif_consultas,capas_base,geovisor')
         },

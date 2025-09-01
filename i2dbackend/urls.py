@@ -6,6 +6,8 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, re_path, include
 from django.shortcuts import redirect
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
@@ -30,18 +32,18 @@ def redirect_to_admin(request):
 urlpatterns = [
     path('', redirect_to_admin, name='home'),
     path('admin/', admin.site.urls),
-    
+
     # Health Check Endpoints
     path('health/', health_check, name='health-check'),
     path('health/simple/', health_check_simple, name='health-check-simple'),
     path('health/ready/', readiness_check, name='readiness-check'),
     path('health/live/', liveness_check, name='liveness-check'),
-    
+
     # API Documentation
     path('api/docs/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('api/redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path('api/schema/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-    
+
     # se incluyen las urls de las apps
     re_path('',include('applications.dpto.urls')),
     re_path('',include('applications.mupio.urls')),
@@ -49,3 +51,8 @@ urlpatterns = [
     re_path('',include('applications.gbif.urls')),
     re_path('',include('applications.user.urls')),
 ]
+
+# Serve static files during development
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

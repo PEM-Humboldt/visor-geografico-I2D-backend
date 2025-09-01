@@ -165,7 +165,131 @@ Para realizar modificaciones sobre los puertos y los volúmenes de los contenedo
 
 Para modificar la configuración de NGINX, se debe modificar el archivo default.conf.
 
+## Auditoría de Base de Datos
 
+### 3.1. Script de Auditoría
+
+El proyecto incluye un script de auditoría de base de datos (`docs/database_audit.sh`) que permite verificar el estado de la base de datos, esquemas, tablas, y probar las consultas del backend con parámetros reales.
+
+### 3.2. Requisitos
+
+- Docker y Docker-compose ejecutándose
+- Contenedor de base de datos `visor_i2d_db` activo
+- Comando `bc` instalado para cálculos de tiempo
+
+### 3.3. Ejecución del Script
+
+#### Comando básico:
+```bash
+# Desde el directorio docs/
+cd docs/
+./database_audit.sh
+```
+
+#### Con archivo de salida personalizado:
+```bash
+# Generar reporte con nombre específico
+./database_audit.sh mi_auditoria.md
+
+# Generar reporte en directorio específico
+./database_audit.sh docs/auditoria_completa.md
+```
+
+#### Verificar ayuda:
+```bash
+./database_audit.sh --help
+```
+
+### 3.4. Qué hace el Script
+
+El script ejecuta múltiples consultas organizadas en dos secciones:
+
+#### **Sección 1: Verificación de Infraestructura **
+- **Conectividad**: Verifica conexión a la base de datos y versión de PostgreSQL
+- **Esquemas**: Lista todos los esquemas disponibles y permisos de acceso
+- **Tablas**: Inventario de tablas por esquema con información de propietarios
+- **Índices**: Documentación de índices para optimización
+- **Extensiones**: Lista extensiones instaladas (PostGIS, etc.)
+- **Restricciones**: Documenta claves foráneas y integridad referencial
+- **Tamaños**: Análisis de uso de almacenamiento por base de datos
+- **Conexiones**: Monitoreo de conexiones activas
+
+#### **Sección 2: Consultas del Backend **
+- **Biodiversidad por Departamento**: Prueba consultas de especies por departamento
+- **Especies Amenazadas**: Verifica datos de conservación por región
+- **Biodiversidad por Municipio**: Prueba consultas municipales
+- **Búsqueda de Municipios**: Verifica búsqueda con manejo de acentos
+- **Información GBIF**: Prueba acceso a metadatos de descargas
+- **Exportación de Registros**: Verifica consultas de exportación
+- **Listas de Especies**: Prueba generación de listas taxonómicas
+
+### 3.5. Interpretación de Resultados
+
+#### **Tiempos de Ejecución**
+- **< 100ms**: Rendimiento excelente
+- **100-500ms**: Rendimiento aceptable
+- **> 500ms**: Requiere optimización
+
+#### **Códigos de Muestra Utilizados**
+El script usa parámetros reales de la base de datos:
+- **Departamento**: Código obtenido dinámicamente (ej: '52' = Nariño)
+- **Municipio**: Código obtenido dinámicamente (ej: '05001' = Medellín)
+- **Búsqueda**: Texto de muestra para búsquedas (ej: 'APART' = Apartadó)
+
+#### **Estructura del Reporte**
+Cada consulta incluye:
+- **Tiempo de ejecución** en milisegundos
+- **Ubicación del archivo** en el código fuente
+- **Propósito** de la consulta
+- **Query SQL** ejecutada
+- **Resultados** con número de filas retornadas
+
+### 3.6. Optimizaciones Implementadas
+
+El script ha sido optimizado para evitar problemas de rendimiento:
+
+- **Sin SELECT \***: Evita cargar columnas de geometría grandes
+- **LIMIT aplicado**: Todas las consultas tienen límite de resultados
+- **Columnas específicas**: Solo selecciona campos necesarios
+- **Timeouts configurados**: Previene consultas colgadas
+- **Parámetros dinámicos**: Usa datos reales de la base de datos
+
+### 3.7. Solución de Problemas
+
+#### Error: "Container not running"
+```bash
+# Verificar contenedores activos
+docker ps
+
+# Iniciar los contenedores si está detenido
+docker-compose up -d
+```
+
+#### Error: "bc command not found"
+```bash
+# Ubuntu/Debian
+sudo apt-get install bc
+
+# Alpine Linux
+apk add bc
+```
+
+#### Error: "Permission denied"
+```bash
+# Dar permisos de ejecución
+chmod +x docs/database_audit.sh
+```
+
+### 3.8. Archivos Generados
+
+El script genera un reporte en formato Markdown con:
+- **Timestamp** de generación
+- **Métricas de rendimiento** para cada consulta
+- **Resultados completos** con datos de muestra
+- **Recomendaciones** para optimización
+- **Resumen ejecutivo** con hallazgos clave
+
+**Ejemplo de salida**: `database_audit_20250815_080527.md`
 
 ## Autores
 
