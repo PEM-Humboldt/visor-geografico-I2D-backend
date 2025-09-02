@@ -14,17 +14,38 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-with open("secret.json") as f:
-    secret = json.loads(f.read())
+# Secrets file is optional; environment variables are the source of truth.
+# You can override the path via SECRET_FILE env var. Default points to project root.
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+SECRET_FILE = os.environ.get('SECRET_FILE', os.path.join(PROJECT_ROOT, 'secret.json'))
+
+def _load_secrets(path):
+    try:
+        if os.path.exists(path):
+            with open(path) as f:
+                return json.load(f)
+        return {}
+    except Exception as e:
+        # If an explicit path was provided and it's unreadable, fail fast
+        if os.environ.get('SECRET_FILE'):
+            raise ImproperlyConfigured(f"Error leyendo el archivo de secretos en {path}: {e}")
+        return {}
+
+secret = _load_secrets(SECRET_FILE)
 
 def get_secret(secret_name, secrets=secret):
     try:
         return secrets[secret_name]
-    except:
+    except KeyError:
         msg = "la variable %s no existe" % secret_name
         raise ImproperlyConfigured(msg)
 
-SECRET_KEY = get_secret('SECRET_KEY')
+# Read SECRET_KEY from environment first, then from optional secrets file.
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY') or secret.get('SECRET_KEY')
+if not SECRET_KEY:
+    raise ImproperlyConfigured(
+        "DJANGO_SECRET_KEY no está definido y no existe SECRET_KEY en el archivo de secretos"
+    )
 
 # Application definition
 

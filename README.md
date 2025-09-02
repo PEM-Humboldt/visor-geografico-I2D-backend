@@ -78,9 +78,11 @@ Clone el proyecto en su equipo e ingrese por línea de comandos al directorio de
 $ git clone https://github.com/PEM-Humboldt/visor-geografico-I2D-backend.git
 ```
 
-### 1.2. Archivo secret.json
+### 1.2. Archivo secret.json (opcional)
 
-El proyecto necesita un archivo secret.json con la siguiente plantilla:
+El proyecto soporta configuración por variables de entorno (recomendado). El archivo `secret.json` es opcional y solo necesario si alguna librería requiere credenciales en formato JSON o si desea mantener compatibilidad con configuraciones previas. Si va a usar un archivo JSON, puede indicar su ruta con la variable de entorno `SECRET_FILE`.
+
+Plantilla de `secret.json`:
 ```
 {
     "FILENAME": "secret.json",
@@ -92,7 +94,7 @@ El proyecto necesita un archivo secret.json con la siguiente plantilla:
     "PORT" : [YOUR DB HOST PORT]
 }
 ```
-Completar el archivo con las credenciales correspondientes y copiarlo en la raíz del proyecto.
+Complete el archivo con las credenciales correspondientes y ubíquelo en una ruta segura (por ejemplo montado como volumen en producción). Para usarlo, defina `SECRET_FILE=/ruta/a/secret.json`. Si no define `SECRET_FILE`, el proyecto intentará usar `./secret.json` si existe.
 
 ### 1.3. Configuración de variables de entorno (.env)
 
@@ -114,6 +116,7 @@ DB_OPTIONS=-c search_path=django,gbif_consultas,capas_base,geovisor
 ```bash
 # Configuración de Django
 DEBUG=true
+DJANGO_SECRET_KEY=su-clave-secreta-django
 ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
 
 # Configuración de archivos estáticos y media
@@ -125,6 +128,11 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
 ```
 
 **Nota:** Las variables de entorno tienen prioridad sobre los valores del archivo `secret.json`. Si una variable está definida en ambos lugares, se usará el valor de la variable de entorno.
+
+Además, si desea usar un archivo JSON para credenciales, exponga su ruta mediante `SECRET_FILE`. Por ejemplo:
+```bash
+SECRET_FILE=/run/secrets/i2d_backend.json
+```
 
 ### 1.4. Instalación de paquetes:
 Ubíquese en la carpeta raíz del proyecto y ejecute la siguiente sentencia para instalar las dependencias del proyecto:
@@ -172,9 +180,7 @@ Una vez se haya clonado el repositorio, verificar que en la raíz del mismo se e
 - dockerfile
 - docker-compose.yml
 - default.conf
-- secret.json
-
-El archivo secret.json debe ser completado según el paso 1.2. con los datos del entorno de producción y debe ser copiado en la raíz.
+- (opcional) `secret.json` si decide usar archivo de secretos. Alternativamente, configure variables de entorno y/o `SECRET_FILE` apuntando a su JSON en una ruta segura.
 
 A continuación, desde la raíz del proyecto se debe ejecutar el siguiente comando para construir la imagen personalizada del contenedor que ejecutará el componente de Django con Gunicorn:
 
