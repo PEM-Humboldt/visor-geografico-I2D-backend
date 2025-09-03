@@ -148,6 +148,9 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Django 4.2+ required setting
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
 # REST Framework Configuration
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [

@@ -30,5 +30,5 @@ MEDIA_ROOT = os.getenv('MEDIA_ROOT', '/app/media')
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
     origin.strip() for origin in os.getenv('CORS_ALLOWED_ORIGINS',
-        'https://i2d.humboldt.org.co,http://i2d.humboldt.org.co/visor-I2D/').split(',')
+        'https://i2d.humboldt.org.co,http://i2d.humboldt.org.co').split(',')
 ]
