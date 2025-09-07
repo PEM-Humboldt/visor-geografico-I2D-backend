@@ -38,13 +38,108 @@ https://geoservicios.humboldt.org.co/geoserver/gefparamos/wms?...&LAYERS=gefpara
 - `paramo` layer: `Historicos` → `gefparamos`
 - `municipio` layer: `Historicos` → `gefparamos`
 
-### 3. Database Cleanup
-Removed 8 non-existent layers that were causing WMS failures:
-- Proyecto Oleoducto Bicentenario: Cobertura Bo
-- Gobernanza: Posibles procesos de gobernanza
-- Restauración: 6 layers (Integridad, Red Viveros, 4 escenario targets)
+### 3. Restauración Group Corrections (General project)
+The `Restauración` group for the General project had the WRONG subitems (copied from ecoreservas “Compensación”). This caused the UI button to do nothing because WMS requests targeted non-existing layers/workspaces.
 
-Removed 4 empty layer groups after cleanup.
+Fixes applied:
+- Replaced incorrect subitems with the 6 correct layers used in production.
+- Updated GeoServer workspace for these layers to `weplan` so the LAYERS param matches production, e.g. `weplan:scen_mincost_target4`.
+
+Final expected items under General → Restauración:
+- Integridad (`weplan:integr_total4326`)
+- Red Viveros (`weplan:red_viveros`)
+- Escenario mínimo costo target 1 (`weplan:scen_mincost_target1`)
+- Escenario mínimo costo target 2 (`weplan:scen_mincost_target2`)
+- Escenario mínimo costo target 3 (`weplan:scen_mincost_target3`)
+- Escenario mínimo costo target 4 (`weplan:scen_mincost_target4`)
+
+How it was fixed (SQL applied locally):
+
+```sql
+-- Remove incorrect (Compensación/ecoreservas) layers from General → Restauración
+WITH grp AS (
+  SELECT lg.id
+  FROM django.layer_groups lg
+  JOIN django.projects p ON p.id = lg.proyecto_id
+  WHERE p.nombre_corto = 'general' AND lg.nombre = 'Restauración'
+  LIMIT 1
+)
+DELETE FROM django.layers l
+USING grp
+WHERE l.grupo_id = (SELECT id FROM grp)
+  AND (
+    l.store_geoserver = 'ecoreservas' OR
+    l.nombre_display ILIKE '%Compensación%'
+  );
+
+-- Insert the six correct layers if missing
+WITH grp AS (
+  SELECT lg.id
+  FROM django.layer_groups lg
+  JOIN django.projects p ON p.id = lg.proyecto_id
+  WHERE p.nombre_corto = 'general' AND lg.nombre = 'Restauración'
+  LIMIT 1
+)
+INSERT INTO django.layers
+  (nombre_geoserver, nombre_display, store_geoserver, estado_inicial, metadata_id, orden, grupo_id, created_at, updated_at)
+SELECT v.nombre_geoserver, v.nombre_display, v.store_geoserver, v.estado_inicial, v.metadata_id, v.orden,
+       (SELECT id FROM grp), NOW(), NOW()
+FROM (
+  VALUES
+    ('integr_total4326',     'Integridad',                         'Historicos', false, '55d29ef5-e419-489f-a450-3299e4bcc4d4', 1),
+    ('red_viveros',         'Red Viveros',                        'Historicos', false, NULL,                                      2),
+    ('scen_mincost_target1','Escenario mínimo costo target 1',    'Historicos', false, '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 3),
+    ('scen_mincost_target2','Escenario mínimo costo target 2',    'Historicos', false, '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 4),
+    ('scen_mincost_target3','Escenario mínimo costo target 3',    'Historicos', false, '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 5),
+    ('scen_mincost_target4','Escenario mínimo costo target 4',    'Historicos', false, '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 6)
+) AS v(nombre_geoserver, nombre_display, store_geoserver, estado_inicial, metadata_id, orden)
+WHERE NOT EXISTS (
+  SELECT 1 FROM django.layers l
+  WHERE l.grupo_id = (SELECT id FROM grp)
+    AND l.nombre_geoserver = v.nombre_geoserver
+);
+
+-- Align GeoServer workspace to production (weplan)
+WITH grp AS (
+  SELECT lg.id AS group_id
+  FROM django.layer_groups lg
+  JOIN django.projects p ON p.id = lg.proyecto_id
+  WHERE p.nombre_corto = 'general' AND lg.nombre = 'Restauración'
+  LIMIT 1
+)
+UPDATE django.layers l
+SET store_geoserver = 'weplan', updated_at = NOW()
+WHERE l.grupo_id = (SELECT group_id FROM grp)
+  AND l.nombre_geoserver IN (
+    'integr_total4326',
+    'red_viveros',
+    'scen_mincost_target1',
+    'scen_mincost_target2',
+    'scen_mincost_target3',
+    'scen_mincost_target4'
+  );
+```
+
+Verification (API):
+
+```bash
+curl -s "http://localhost:8001/api/layer-groups/?project=1" \
+  | jq -r '.[] | select(.nombre=="Restauración") | .layers[] | "\(.nombre_display) -> \(.store_geoserver):\(.nombre_geoserver)"'
+# Expected:
+# Integridad -> weplan:integr_total4326
+# Red Viveros -> weplan:red_viveros
+# Escenario mínimo costo target 1 -> weplan:scen_mincost_target1
+# Escenario mínimo costo target 2 -> weplan:scen_mincost_target2
+# Escenario mínimo costo target 3 -> weplan:scen_mincost_target3
+# Escenario mínimo costo target 4 -> weplan:scen_mincost_target4
+```
+
+Verification (GeoServer WMS example):
+
+```bash
+curl -s "https://geoservicios.humboldt.org.co/geoserver/weplan/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=true&LAYERS=weplan:scen_mincost_target4&STYLES=&TILED=true&WIDTH=256&HEIGHT=256&CRS=EPSG:3857&BBOX=-7514065.6285,626172.1357,-7200979.5607,939258.2036" -o /dev/null -w "%{http_code}\n"
+# Expect 200
+```
 
 ## Final Database State
 
@@ -88,6 +183,11 @@ curl -s http://localhost:8001/api/projects/1/layer_groups/ | jq -r '.[] | "\(.no
 ### Verify GeoServer Layer Exists:
 ```bash
 curl -s "https://geoservicios.humboldt.org.co/geoserver/gefparamos/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetCapabilities" | grep -A 2 -B 2 "paramo"
+```
+
+### Verify WePlan Workspace Layers (Restauración)
+```bash
+curl -s "https://geoservicios.humboldt.org.co/geoserver/weplan/wms?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&FORMAT=image/png&TRANSPARENT=true&LAYERS=weplan:integr_total4326&STYLES=&TILED=true&WIDTH=256&HEIGHT=256&CRS=EPSG:3857&BBOX=-8237642,395691,-7858217,774116" -o /dev/null -w "%{http_code}\n"
 ```
 
 ## Impact
