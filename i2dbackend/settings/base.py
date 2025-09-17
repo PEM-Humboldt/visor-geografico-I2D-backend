@@ -144,8 +144,6 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_L10N = True
-
 USE_TZ = True
 
 # Django 4.2+ required setting
@@ -191,4 +189,3 @@ SWAGGER_SETTINGS = {
     'SHOW_EXTENSIONS': True,
     'SHOW_COMMON_EXTENSIONS': True,
 }
-

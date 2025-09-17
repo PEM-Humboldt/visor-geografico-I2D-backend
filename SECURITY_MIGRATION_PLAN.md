@@ -97,8 +97,10 @@ curl http://localhost:8000/api/
 1. Keep original requirements.txt as backup
 2. Revert to original requirements: `pip install -r requirements.txt.backup`
 3. Remove `DEFAULT_AUTO_FIELD` if needed
-4. Restart services
-
+4. Rollback database migrations if any were applied:
+   `python manage.py migrate <app_name> <previous_migration_name>`
+   Or restore from database backup if available
+5. Restart services
 ## ✅ Success Criteria
 - All security vulnerabilities resolved
 - No breaking functionality
