@@ -1,7 +1,7 @@
 # Backend-Visor-I2D
 
-[![Django](https://img.shields.io/badge/Django-3.1.7-092E20?style=flat&logo=django&logoColor=white)](https://www.djangoproject.com/)
-[![Python](https://img.shields.io/badge/Python-3.9.2-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
+[![Django](https://img.shields.io/badge/Django-4.2_LTS-092E20?style=flat&logo=django&logoColor=white)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.12-3776AB?style=flat&logo=python&logoColor=white)](https://www.python.org/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat&logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 [![PostGIS](https://img.shields.io/badge/PostGIS-3.4-4169E1?style=flat&logo=postgresql&logoColor=white)](https://postgis.net/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white)](https://docs.docker.com/)
@@ -34,9 +34,9 @@ El backend del Visor Geográfico I2D es un sistema robusto de información geogr
 ## 🛠️ Stack Tecnológico
 
 ### Backend Core
-- **Python**: 3.9.2
-- **Django**: 3.1.7 con django.contrib.gis
-- **Django REST Framework**: 3.12.2
+- **Python**: 3.12
+- **Django**: 4.2 LTS con django.contrib.gis
+- **Django REST Framework**: 3.15.2
 - **PostGIS**: Operaciones espaciales completas
 
 ### Base de Datos
@@ -50,10 +50,17 @@ El backend del Visor Geográfico I2D es un sistema robusto de información geogr
 - **Contenedores**: Docker + Docker Compose
 - **Monitoreo**: Health checks y logs estructurados
 
+### 🔒 Compatibilidad y Seguridad
+- **Python 3.12**: Versión estable actual con mejoras de seguridad y rendimiento
+- **Django 4.2 LTS**: Soporte a largo plazo hasta abril 2026, actualizaciones de seguridad garantizadas
+- **PostgreSQL 16**: Última versión estable con mejoras de rendimiento
+- **Dependencias**: Todas las librerías actualizadas para resolver vulnerabilidades conocidas (CVE-2023-32681, etc.)
+- **Matriz de Pruebas**: Verificado en Python 3.11+ y Django 4.2.16+
+
 ## 📋 Prerequisitos
 
 ### Para Desarrollo Local:
-- Python 3.9.2+
+- Python 3.12+
 - pip
 - postgresql-dev, gcc, python3-dev, musl-dev
 - PostgreSQL con PostGIS
@@ -534,7 +541,7 @@ curl http://localhost:8001/api/mpio/search/bogota/
 - **Documentación**: Ver auditoría de base de datos para métricas
 
 ### 📚 Recursos Técnicos
-- [Django GIS Documentation](https://docs.djangoproject.com/en/3.1/ref/contrib/gis/)
+- [Django GIS Documentation](https://docs.djangoproject.com/en/4.2/ref/contrib/gis/)
 - [PostGIS Documentation](https://postgis.net/documentation/)
 - [Django REST Framework](https://www.django-rest-framework.org/)
 

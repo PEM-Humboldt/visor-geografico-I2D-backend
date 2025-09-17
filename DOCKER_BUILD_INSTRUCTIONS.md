@@ -17,8 +17,8 @@ docker build -f Dockerfile.prod -t visor-i2d-backend:security-updated .
 
 #### 2. Build for Main Humboldt Project
 ```bash
-# Navigate to main Humboldt project
-cd /home/mrueda/WWW/humboldt
+# Navigate to main Humboldt project root directory
+cd ../
 
 # Build with proper tags for main project
 docker build -f visor-geografico-I2D-backend/Dockerfile.prod \
@@ -31,9 +31,9 @@ docker build -f visor-geografico-I2D-backend/Dockerfile.prod \
 #### 3. Build with Version Tags
 ```bash
 # Get current commit hash for tagging
-cd /home/mrueda/WWW/humboldt/visor-geografico-I2D-backend
+cd ../visor-geografico-I2D-backend
 COMMIT_HASH=$(git rev-parse --short HEAD)
-cd /home/mrueda/WWW/humboldt
+cd ../
 
 # Build with multiple tags
 docker build -f visor-geografico-I2D-backend/Dockerfile.prod \

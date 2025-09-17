@@ -1,5 +1,5 @@
 # Development Dockerfile for Visor I2D Backend - Security Updated
-FROM python:3.11-slim-bookworm
+FROM python:3.12-slim-bookworm
 
 # Set environment variables for development
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -33,7 +33,10 @@ COPY . /project/
 
 # Create necessary directories and set permissions
 RUN mkdir -p /var/log/django /project/static /project/media && \
-    chmod -R 755 /project
+    chmod 755 /project/static /project/media /var/log/django && \
+    find /project -type f -exec chmod 644 {} \; && \
+    find /project -type d -exec chmod 755 {} \; && \
+    chmod +x /project/manage.py
 
 # Expose port
 EXPOSE 8001

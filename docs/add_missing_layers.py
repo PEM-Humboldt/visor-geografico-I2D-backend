@@ -7,13 +7,13 @@ import sys
 import django
 
 # Setup Django environment
-sys.path.append('/home/mrueda/WWW/humboldt/visor-geografico-I2D-backend')
+# Add the backend directory to Python path using relative path
+backend_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(backend_path)
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'i2dbackend.settings.local')
 django.setup()
 
 from applications.projects.models import Project, LayerGroup, Layer
-from django.utils import timezone
-
 def main():
     try:
         # Get the general project
@@ -23,7 +23,7 @@ def main():
         # Create the missing layer groups
         layer_groups_data = [
             {'nombre': 'Capas Base', 'orden': 0},
-            {'nombre': 'División político-administrativa', 'orden': 1}, 
+            {'nombre': 'División político-administrativa', 'orden': 1},
             {'nombre': 'Proyecto Oleoducto Bicentenario', 'orden': 5},
             {'nombre': 'Gobernanza', 'orden': 6},
             {'nombre': 'Restauración', 'orden': 7},
