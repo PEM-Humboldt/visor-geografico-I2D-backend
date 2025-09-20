@@ -79,90 +79,52 @@ class LayerAdminForm(forms.ModelForm):
         fields = '__all__'
         
     def full_clean(self):
-        """
-        Override full_clean to handle dynamic grupo field validation
-        """
-        # Temporarily expand the grupo queryset to include all groups
-        # This prevents Django from rejecting dynamically loaded options
         if 'grupo' in self.data and self.data['grupo']:
             try:
                 grupo_id = int(self.data['grupo'])
-                # Ensure the selected group is in the queryset
                 if not self.fields['grupo'].queryset.filter(pk=grupo_id).exists():
                     self.fields['grupo'].queryset = LayerGroup.objects.filter(
                         models.Q(pk=grupo_id) | models.Q(pk__in=self.fields['grupo'].queryset)
                     )
             except (ValueError, TypeError):
                 pass
-        
         super().full_clean()
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        # If editing existing layer, set the project field
         if self.instance and self.instance.pk and self.instance.grupo:
             self.fields['proyecto'].initial = self.instance.grupo.proyecto
-            # Filter groups by the layer's project
             self.fields['grupo'].queryset = LayerGroup.objects.filter(
                 proyecto=self.instance.grupo.proyecto
-            ).select_related('proyecto', 'parent_group')
+            )
         else:
-            # For new layers, show all groups to avoid validation issues
-            # The JavaScript will filter them dynamically
-            self.fields['grupo'].queryset = LayerGroup.objects.all().select_related('proyecto', 'parent_group')
+            self.fields['grupo'].queryset = LayerGroup.objects.all()
 
-        # Add CSS classes and help text
         self.fields['grupo'].widget.attrs.update({
             'id': 'id_grupo',
             'class': 'grupo-selector'
         })
-        self.fields['grupo'].help_text = "Seleccione el grupo para esta capa (organizado por proyecto)"
-
-        # Enhance group display with hierarchical names
-        if self.fields['grupo'].queryset.exists():
-            choices = []
-            for group in self.fields['grupo'].queryset:
-                if group.parent_group:
-                    display_name = f"{group.parent_group.nombre} → {group.nombre}"
-                else:
-                    display_name = group.nombre
-                choices.append((group.pk, display_name))
-            self.fields['grupo'].choices = [('', '---------')] + choices
 
     def clean_grupo(self):
-        """
-        Custom validation for grupo field that allows dynamically loaded options
-        """
-        grupo_id = self.data.get('grupo')  # Get raw form data
-        
+        grupo_id = self.data.get('grupo')
         if not grupo_id:
             raise forms.ValidationError('Debe seleccionar un grupo para la capa.')
-        
         try:
-            # Validate that the grupo exists and get the object
-            grupo = LayerGroup.objects.get(pk=grupo_id)
-            return grupo
+            return LayerGroup.objects.get(pk=grupo_id)
         except (ValueError, LayerGroup.DoesNotExist):
-            raise forms.ValidationError('Escoja una opción válida. Esa opción no está entre las disponibles.')
+            raise forms.ValidationError('Grupo no válido.')
     
     def clean(self):
-        """
-        Custom validation that handles the proyecto field properly
-        """
         cleaned_data = super().clean()
-
-        # Get the values
         proyecto = cleaned_data.get('proyecto')
         grupo = cleaned_data.get('grupo')
 
-        # If proyecto is provided and grupo exists, validate the relationship
         if proyecto and grupo and grupo.proyecto != proyecto:
             raise forms.ValidationError({
-                'grupo': f'El grupo seleccionado no pertenece al proyecto "{proyecto.nombre_corto}".'
+                'grupo': f'El grupo no pertenece al proyecto "{proyecto.nombre_corto}".'
             })
 
-        # IMPORTANT: Remove proyecto from cleaned_data since it's not a model field
         if 'proyecto' in cleaned_data:
             del cleaned_data['proyecto']
 
