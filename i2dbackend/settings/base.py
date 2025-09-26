@@ -65,6 +65,7 @@ LOCAL_APPS = (
     'applications.mupiopolitico',
     'applications.gbif',
     'applications.user',
+    'applications.projects',
 )
 
 THIRD_PARTY_APPS = (
@@ -143,9 +144,10 @@ TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
-USE_L10N = True
-
 USE_TZ = True
+
+# Django 4.2+ required setting
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # REST Framework Configuration
 REST_FRAMEWORK = {
@@ -154,6 +156,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_PARSER_CLASSES': [
         'rest_framework.parsers.JSONParser',
+        'rest_framework.parsers.FormParser',
+        'rest_framework.parsers.MultiPartParser',
     ],
 }
 
@@ -185,4 +189,3 @@ SWAGGER_SETTINGS = {
     'SHOW_EXTENSIONS': True,
     'SHOW_COMMON_EXTENSIONS': True,
 }
-

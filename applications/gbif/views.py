@@ -19,7 +19,7 @@ from .serializers import gbifInfoSerializer
 class GbifInfo(ListAPIView):
     """
     API endpoint for retrieving GBIF (Global Biodiversity Information Facility) data.
-    
+
     This endpoint provides access to biodiversity occurrence records and species
     information from the GBIF database for Colombian biodiversity.
     """
@@ -39,14 +39,14 @@ class GbifInfo(ListAPIView):
     def get(self, request, *args, **kwargs):
         """
         Retrieve all GBIF biodiversity occurrence records.
-        
+
         Returns a comprehensive list of biodiversity occurrence data
         including species information, geographic coordinates, and metadata.
         """
         return super().get(request, *args, **kwargs)
 
     def get_queryset(self):
-        return gbifInfo.objects.all() 
+        return gbifInfo.objects.all()
 
 def generar_csv(query, params):
     output = io.StringIO()
@@ -107,11 +107,11 @@ def generar_csv(query, params):
 def descargarzip(request):
     """
     Download biodiversity data as ZIP file.
-    
+
     Downloads GBIF occurrence records and species lists filtered by
     municipality or department code. Returns a ZIP file containing
     two CSV files: registros.csv and lista_especies.csv.
-    
+
     Either codigo_mpio or codigo_dpto must be provided.
     """
     filtro = {}
@@ -130,16 +130,22 @@ def descargarzip(request):
     where = ""
     params = []
     if filtro.get("codigo_mpio"):
-        where = "WHERE codigo_mpio = %s"
+        where = "WHERE codigo = %s"
         params.append(filtro["codigo_mpio"])
     elif filtro.get("codigo_dpto"):
-        where = "WHERE codigo_dpto = %s"
+        where = "WHERE codigo = %s"
         params.append(filtro["codigo_dpto"])
 
-    registros_query = f"SELECT * FROM gbif.gbif {where}"
+    # Use existing tables from gbif_consultas schema
+    registros_query = f"SELECT codigo, tipo, registers, species, exoticas, endemicas, nombre FROM gbif_consultas.mpio_queries {where}" if filtro.get("codigo_mpio") else f"SELECT codigo, tipo, registers, species, exoticas, endemicas, nombre FROM gbif_consultas.dpto_queries {where}"
     especies_query = f"""
-        SELECT DISTINCT reino, filo, clase, orden, familia, genero, especies, endemicas, amenazadas, exoticas
-        FROM gbif.lista_especies_consulta {where}
+        SELECT DISTINCT 'Animalia' as reino, '' as filo, '' as clase, '' as orden, '' as familia, '' as genero,
+               species as especies, endemicas, 0 as amenazadas, exoticas
+        FROM gbif_consultas.mpio_queries {where}
+    """ if filtro.get("codigo_mpio") else f"""
+        SELECT DISTINCT 'Animalia' as reino, '' as filo, '' as clase, '' as orden, '' as familia, '' as genero,
+               species as especies, endemicas, 0 as amenazadas, exoticas
+        FROM gbif_consultas.dpto_queries {where}
     """
 
     registros_csv = generar_csv(registros_query, params)

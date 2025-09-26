@@ -1,9 +1,11 @@
 from django.shortcuts import render
 from rest_framework.generics import ListAPIView
+from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
 from .models import MpioQueries, MpioAmenazas
 from .serializers import mpioQueriesSerializer, mpioDangerSerializer
+from applications.mupiopolitico.models import MpioPolitico
 
 class mpioQuery(ListAPIView):
     """
@@ -95,3 +97,62 @@ class mpioDanger(ListAPIView):
     def get_queryset(self):
         kid = self.kwargs['kid']
         return MpioAmenazas.objects.filter(codigo=kid).exclude(tipo__isnull=True)
+
+
+class mpioSearch(ListAPIView):
+    """
+    API endpoint for searching municipalities by name.
+    
+    Returns a list of municipalities that match the search term,
+    including their coordinates for map navigation.
+    """
+    
+    @swagger_auto_schema(
+        operation_description="Search municipalities by name",
+        operation_summary="Municipality Search",
+        tags=['Municipality'],
+        manual_parameters=[
+            openapi.Parameter(
+                'search_term',
+                openapi.IN_PATH,
+                description="Search term to find municipalities (e.g., 'buca' for Bucaramanga)",
+                type=openapi.TYPE_STRING,
+                required=True
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Search results retrieved successfully",
+                examples={
+                    "application/json": [
+                        {
+                            "nombre": "BUCARAMANGA",
+                            "dpto_nombre": "SANTANDER", 
+                            "codigo": "68001",
+                            "coord_central": "[-73.1117857645743, 7.15539013995724]"
+                        }
+                    ]
+                }
+            )
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        """
+        Search municipalities by name.
+        
+        Returns municipalities that contain the search term in their name,
+        along with department name and central coordinates for map navigation.
+        """
+        search_term = self.kwargs.get('search_term', '')
+        
+        if not search_term:
+            return Response([])
+            
+        # Search municipalities by name (case insensitive)
+        municipalities = MpioPolitico.objects.filter(
+            nombre__icontains=search_term
+        ).values(
+            'nombre', 'dpto_nombre', 'codigo', 'coord_central'
+        )[:10]  # Limit to 10 results
+        
+        return Response(list(municipalities))

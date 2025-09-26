@@ -1,5 +1,5 @@
 # Production-optimized Dockerfile for Visor I2D Backend
-FROM python:3.9.2-slim-bullseye
+FROM python:3.12-slim-bookworm
 
 # Set environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -26,7 +26,8 @@ WORKDIR /project
 
 # Install Python dependencies
 COPY requirements.txt /project/
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt && \
+    pip install --no-cache-dir gevent
 
 # Copy project files
 COPY . /project/
@@ -38,8 +39,7 @@ RUN mkdir -p /var/log/django /app/static /app/media && \
 # Switch to non-root user
 USER django
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Note: collectstatic will be run during container startup when database is available
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

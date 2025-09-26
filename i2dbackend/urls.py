@@ -50,6 +50,10 @@ urlpatterns = [
     re_path('',include('applications.mupiopolitico.urls')),
     re_path('',include('applications.gbif.urls')),
     re_path('',include('applications.user.urls')),
+    path('api/', include('applications.projects.urls')),
+
+    # AJAX endpoints for admin interface
+    path('ajax/admin/projects/', include('applications.projects.urls')),
 ]
 
 # Serve static files during development
