@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -144,12 +144,13 @@ class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(serializer.data)
 
 
-class LayerGroupViewSet(viewsets.ReadOnlyModelViewSet):
+class LayerGroupViewSet(viewsets.ModelViewSet):
     """
-    ViewSet for LayerGroup model
+    ViewSet for LayerGroup model with full CRUD operations
     """
     queryset = LayerGroup.objects.all()
     serializer_class = LayerGroupSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         """
@@ -160,6 +161,18 @@ class LayerGroupViewSet(viewsets.ReadOnlyModelViewSet):
         if project_id is not None:
             queryset = queryset.filter(proyecto_id=project_id)
         return queryset
+
+    def perform_create(self, serializer):
+        """
+        Custom create with validation
+        """
+        serializer.save()
+
+    def perform_update(self, serializer):
+        """
+        Custom update with validation
+        """
+        serializer.save()
 
 
 class LayerViewSet(viewsets.ReadOnlyModelViewSet):

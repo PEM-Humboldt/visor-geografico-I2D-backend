@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django import forms
 from django.db import models
+from django.utils.html import format_html
 from .models import Project, LayerGroup, Layer, DefaultLayer
 
 
@@ -34,22 +35,48 @@ class ProjectAdmin(admin.ModelAdmin):
     )
 
 
+class LayerGroupAdminForm(forms.ModelForm):
+    """
+    Custom form with color picker widget
+    """
+    class Meta:
+        model = LayerGroup
+        fields = '__all__'
+        widgets = {
+            'color': forms.TextInput(attrs={
+                'type': 'color',
+                'style': 'width: 100px; height: 40px; cursor: pointer;'
+            })
+        }
+
+
 @admin.register(LayerGroup)
 class LayerGroupAdmin(admin.ModelAdmin):
     """
     Admin interface for LayerGroup model
     """
-    list_display = ['nombre', 'proyecto', 'parent_group', 'orden', 'fold_state']
+    form = LayerGroupAdminForm
+    list_display = ['nombre', 'proyecto', 'parent_group', 'orden', 'fold_state', 'color_preview']
     list_filter = ['proyecto', 'fold_state', 'parent_group']
     search_fields = ['nombre', 'proyecto__nombre_corto']
     list_editable = ['orden']
+
+    def color_preview(self, obj):
+        """
+        Display color preview in list view
+        """
+        return format_html(
+            '<div style="width: 30px; height: 30px; background-color: {}; border: 1px solid #ccc; border-radius: 3px;"></div>',
+            obj.color
+        )
+    color_preview.short_description = 'Color'
 
     fieldsets = (
         ('Basic Information', {
             'fields': ('proyecto', 'nombre', 'parent_group')
         }),
         ('Display Configuration', {
-            'fields': ('orden', 'fold_state')
+            'fields': ('orden', 'fold_state', 'color')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
@@ -77,7 +104,7 @@ class LayerAdminForm(forms.ModelForm):
     class Meta:
         model = Layer
         fields = '__all__'
-        
+
     def full_clean(self):
         if 'grupo' in self.data and self.data['grupo']:
             try:
@@ -114,7 +141,7 @@ class LayerAdminForm(forms.ModelForm):
             return LayerGroup.objects.get(pk=grupo_id)
         except (ValueError, LayerGroup.DoesNotExist):
             raise forms.ValidationError('Grupo no válido.')
-    
+
     def clean(self):
         cleaned_data = super().clean()
         proyecto = cleaned_data.get('proyecto')

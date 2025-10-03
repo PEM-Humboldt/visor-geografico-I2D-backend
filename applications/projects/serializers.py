@@ -1,4 +1,5 @@
 from rest_framework import serializers
+import re
 from .models import Project, LayerGroup, Layer, DefaultLayer
 
 
@@ -25,8 +26,19 @@ class LayerGroupSerializer(serializers.ModelSerializer):
         model = LayerGroup
         fields = [
             'id', 'nombre', 'orden', 'fold_state', 'parent_group',
-            'layers', 'subgroups'
+            'color', 'layers', 'subgroups'
         ]
+
+    def validate_color(self, value):
+        """
+        Validate hexadecimal color format
+        """
+        pattern = r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'
+        if not re.match(pattern, value):
+            raise serializers.ValidationError(
+                'Invalid color format. Use hexadecimal format (e.g., #FF5733 or #F57)'
+            )
+        return value.upper()  # Normalize to uppercase
 
     def get_subgroups(self, obj):
         """
