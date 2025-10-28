@@ -2,7 +2,7 @@ from django.contrib import admin
 from django import forms
 from django.db import models
 from django.utils.html import format_html
-from .models import Project, LayerGroup, Layer, DefaultLayer
+from .models import Project, LayerGroup, Layer
 
 
 @admin.register(Project)
@@ -219,23 +219,3 @@ class LayerAdmin(admin.ModelAdmin):
         return filter_groups_by_project(request)
 
 
-@admin.register(DefaultLayer)
-class DefaultLayerAdmin(admin.ModelAdmin):
-    """
-    Admin interface for DefaultLayer model
-    """
-    list_display = ['proyecto', 'layer', 'visible_inicial']
-    list_filter = ['proyecto', 'visible_inicial']
-    search_fields = ['proyecto__nombre_corto', 'layer__nombre_display']
-    list_editable = ['visible_inicial']
-
-    fieldsets = (
-        ('Configuration', {
-            'fields': ('proyecto', 'layer', 'visible_inicial')
-        }),
-        ('Timestamps', {
-            'fields': ('created_at',),
-            'classes': ('collapse',)
-        }),
-    )
-    readonly_fields = ['created_at']

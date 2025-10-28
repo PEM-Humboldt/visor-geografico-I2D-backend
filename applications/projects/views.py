@@ -7,10 +7,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import Project, LayerGroup, Layer, DefaultLayer
+from .models import Project, LayerGroup, Layer
 from .serializers import (
     ProjectSerializer, ProjectDetailSerializer, LayerGroupSerializer,
-    LayerSerializer, DefaultLayerSerializer
+    LayerSerializer
 )
 
 
@@ -133,15 +133,6 @@ class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = LayerSerializer(layers, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['get'])
-    def default_layers(self, request, pk=None):
-        """
-        Get default layers for a specific project
-        """
-        project = self.get_object()
-        default_layers = project.default_layers.all()
-        serializer = DefaultLayerSerializer(default_layers, many=True)
-        return Response(serializer.data)
 
 
 class LayerGroupViewSet(viewsets.ModelViewSet):

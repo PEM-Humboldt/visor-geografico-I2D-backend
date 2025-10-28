@@ -116,20 +116,3 @@ class Layer(models.Model):
         return f"{self.grupo.proyecto.nombre_corto} - {self.nombre_display}"
 
 
-class DefaultLayer(models.Model):
-    """
-    Model for default layers that should be loaded when entering a project
-    """
-    proyecto = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='default_layers')
-    layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
-    visible_inicial = models.BooleanField(default=True, help_text="Initial visibility")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'default_layers'
-        verbose_name = 'Default Layer'
-        verbose_name_plural = 'Default Layers'
-        unique_together = ['proyecto', 'layer']
-
-    def __str__(self):
-        return f"{self.proyecto.nombre_corto} - {self.layer.nombre_display}"
