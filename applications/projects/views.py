@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
@@ -7,10 +7,10 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 import json
-from .models import Project, LayerGroup, Layer, DefaultLayer
+from .models import Project, LayerGroup, Layer
 from .serializers import (
     ProjectSerializer, ProjectDetailSerializer, LayerGroupSerializer,
-    LayerSerializer, DefaultLayerSerializer
+    LayerSerializer
 )
 
 
@@ -133,23 +133,15 @@ class ProjectViewSet(viewsets.ReadOnlyModelViewSet):
         serializer = LayerSerializer(layers, many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['get'])
-    def default_layers(self, request, pk=None):
-        """
-        Get default layers for a specific project
-        """
-        project = self.get_object()
-        default_layers = project.default_layers.all()
-        serializer = DefaultLayerSerializer(default_layers, many=True)
-        return Response(serializer.data)
 
 
-class LayerGroupViewSet(viewsets.ReadOnlyModelViewSet):
+class LayerGroupViewSet(viewsets.ModelViewSet):
     """
-    ViewSet for LayerGroup model
+    ViewSet for LayerGroup model with full CRUD operations
     """
     queryset = LayerGroup.objects.all()
     serializer_class = LayerGroupSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
 
     def get_queryset(self):
         """
@@ -160,6 +152,18 @@ class LayerGroupViewSet(viewsets.ReadOnlyModelViewSet):
         if project_id is not None:
             queryset = queryset.filter(proyecto_id=project_id)
         return queryset
+
+    def perform_create(self, serializer):
+        """
+        Custom create with validation
+        """
+        serializer.save()
+
+    def perform_update(self, serializer):
+        """
+        Custom update with validation
+        """
+        serializer.save()
 
 
 class LayerViewSet(viewsets.ReadOnlyModelViewSet):

@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from applications.projects.models import Project, LayerGroup, Layer, DefaultLayer
+from applications.projects.models import Project, LayerGroup, Layer
 
 
 class Command(BaseCommand):

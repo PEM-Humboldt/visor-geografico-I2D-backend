@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.gis.db import models as gis_models
+from django.core.validators import RegexValidator
 
 
 class Project(models.Model):
@@ -15,7 +16,7 @@ class Project(models.Model):
     coordenada_central_y = models.FloatField(help_text="Center Y coordinate")
     panel_visible = models.BooleanField(default=True, help_text="Panel visibility on startup")
     base_map_visible = models.CharField(
-        max_length=50, 
+        max_length=50,
         default='streetmap',
         choices=[
             ('streetmap', 'Street Map'),
@@ -54,12 +55,24 @@ class LayerGroup(models.Model):
         help_text="Initial fold state"
     )
     parent_group = models.ForeignKey(
-        'self', 
-        on_delete=models.CASCADE, 
-        null=True, 
-        blank=True, 
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         related_name='subgroups',
         help_text="Parent group for subgroups"
+    )
+    color = models.CharField(
+        max_length=7,
+        default='#e3e3e3',
+        validators=[
+            RegexValidator(
+                regex=r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',
+                message='Enter a valid hexadecimal color code (e.g., #FF5733 or #F57)',
+                code='invalid_color'
+            )
+        ],
+        help_text='Hexadecimal color code for the layer group (e.g., #FF5733)'
     )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -84,9 +97,9 @@ class Layer(models.Model):
     store_geoserver = models.CharField(max_length=200, help_text="GeoServer store name")
     estado_inicial = models.BooleanField(default=False, help_text="Initial visibility state")
     metadata_id = models.CharField(
-        max_length=500, 
-        blank=True, 
-        null=True, 
+        max_length=500,
+        blank=True,
+        null=True,
         help_text="Metadata ID or external URL"
     )
     orden = models.IntegerField(default=0, help_text="Display order within group")
@@ -103,20 +116,3 @@ class Layer(models.Model):
         return f"{self.grupo.proyecto.nombre_corto} - {self.nombre_display}"
 
 
-class DefaultLayer(models.Model):
-    """
-    Model for default layers that should be loaded when entering a project
-    """
-    proyecto = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='default_layers')
-    layer = models.ForeignKey(Layer, on_delete=models.CASCADE)
-    visible_inicial = models.BooleanField(default=True, help_text="Initial visibility")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'default_layers'
-        verbose_name = 'Default Layer'
-        verbose_name_plural = 'Default Layers'
-        unique_together = ['proyecto', 'layer']
-
-    def __str__(self):
-        return f"{self.proyecto.nombre_corto} - {self.layer.nombre_display}"
