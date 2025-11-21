@@ -113,43 +113,62 @@ def descargarzip(request):
     two CSV files: registros.csv and lista_especies.csv.
 
     Either codigo_mpio or codigo_dpto must be provided.
+    
+    SECURITY: SQL injection protection with input validation.
     """
-    filtro = {}
-    if request.GET.get('codigo_mpio'):
-        filtro["codigo_mpio"] = request.GET['codigo_mpio']
-    elif request.GET.get('codigo_dpto'):
-        filtro["codigo_dpto"] = request.GET['codigo_dpto']
+    import re
+    
+    # Validate input parameters
+    codigo_mpio = request.GET.get('codigo_mpio')
+    codigo_dpto = request.GET.get('codigo_dpto')
+    
+    if not codigo_mpio and not codigo_dpto:
+        return Response(
+            {'error': 'Debe proporcionar codigo_mpio o codigo_dpto'}, 
+            status=status.HTTP_400_BAD_REQUEST
+        )
+    
+    # Validate code format to prevent SQL injection
+    if codigo_mpio:
+        if not re.match(r'^\d{5}$', codigo_mpio):
+            return Response(
+                {'error': 'Código de municipio inválido (debe ser 5 dígitos)'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        table_name = 'mpio_queries'
+        codigo = codigo_mpio
     else:
-        return Response({'error': 'Debe proporcionar codigo_mpio o codigo_dpto'}, status=status.HTTP_400_BAD_REQUEST)
-
-    nombre = request.GET.get('nombre', 'descarga_datos')
-    # Limpiar el nombre para evitar caracteres no válidos
-    nombre = "".join(c for c in nombre if c.isalnum() or c in (' ', '_', '-')).rstrip()
-
-    # Generar CSVs
-    where = ""
-    params = []
-    if filtro.get("codigo_mpio"):
-        where = "WHERE codigo = %s"
-        params.append(filtro["codigo_mpio"])
-    elif filtro.get("codigo_dpto"):
-        where = "WHERE codigo = %s"
-        params.append(filtro["codigo_dpto"])
-
-    # Use existing tables from gbif_consultas schema
-    registros_query = f"SELECT codigo, tipo, registers, species, exoticas, endemicas, nombre FROM gbif_consultas.mpio_queries {where}" if filtro.get("codigo_mpio") else f"SELECT codigo, tipo, registers, species, exoticas, endemicas, nombre FROM gbif_consultas.dpto_queries {where}"
-    especies_query = f"""
-        SELECT DISTINCT 'Animalia' as reino, '' as filo, '' as clase, '' as orden, '' as familia, '' as genero,
-               species as especies, endemicas, 0 as amenazadas, exoticas
-        FROM gbif_consultas.mpio_queries {where}
-    """ if filtro.get("codigo_mpio") else f"""
-        SELECT DISTINCT 'Animalia' as reino, '' as filo, '' as clase, '' as orden, '' as familia, '' as genero,
-               species as especies, endemicas, 0 as amenazadas, exoticas
-        FROM gbif_consultas.dpto_queries {where}
+        if not re.match(r'^\d{2}$', codigo_dpto):
+            return Response(
+                {'error': 'Código de departamento inválido (debe ser 2 dígitos)'}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        table_name = 'dpto_queries'
+        codigo = codigo_dpto
+    
+    # Validate and sanitize filename
+    nombre = request.GET.get('nombre', 'descarga_datos')[:50]
+    nombre = re.sub(r'[^a-zA-Z0-9_-]', '', nombre) or 'descarga_datos'
+    
+    # Use parameterized queries to prevent SQL injection
+    registros_query = f"""
+        SELECT codigo, tipo, registers, species, exoticas, endemicas, nombre 
+        FROM gbif_consultas.{table_name} 
+        WHERE codigo = %s
     """
-
-    registros_csv = generar_csv(registros_query, params)
-    especies_csv = generar_csv(especies_query, params)
+    
+    especies_query = f"""
+        SELECT DISTINCT 
+            'Animalia' as reino, '' as filo, '' as clase, '' as orden, 
+            '' as familia, '' as genero, species as especies, 
+            endemicas, 0 as amenazadas, exoticas
+        FROM gbif_consultas.{table_name} 
+        WHERE codigo = %s
+    """
+    
+    # Execute with parameters (prevents SQL injection)
+    registros_csv = generar_csv(registros_query, [codigo])
+    especies_csv = generar_csv(especies_query, [codigo])
 
     # Empaquetar ZIP
     zip_buffer = io.BytesIO()
