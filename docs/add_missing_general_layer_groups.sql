@@ -5,23 +5,7 @@
 -- Get the general project ID (should be 1)
 -- INSERT layer groups for general project (proyecto_id = 1)
 
--- 1. Add Capas Base layer group (Base maps - handled separately but needed for completeness)
-INSERT INTO layer_groups (nombre, orden, fold_state, parent_group_id, proyecto_id, created_at, updated_at)
-SELECT 'Capas Base', 0, 'close', NULL, 1, NOW(), NOW()
-WHERE NOT EXISTS (
-    SELECT 1 FROM layer_groups
-    WHERE nombre = 'Capas Base' AND proyecto_id = 1
-);
-
--- 2. Add División político-administrativa layer group
-INSERT INTO layer_groups (nombre, orden, fold_state, parent_group_id, proyecto_id, created_at, updated_at)
-SELECT 'División político-administrativa', 1, 'close', NULL, 1, NOW(), NOW()
-WHERE NOT EXISTS (
-    SELECT 1 FROM layer_groups
-    WHERE nombre = 'División político-administrativa' AND proyecto_id = 1
-);
-
--- 3. Add Proyecto Oleoducto Bicentenario layer group
+-- 1. Add Proyecto Oleoducto Bicentenario layer group
 INSERT INTO layer_groups (nombre, orden, fold_state, parent_group_id, proyecto_id, created_at, updated_at)
 SELECT 'Proyecto Oleoducto Bicentenario', 5, 'close', NULL, 1, NOW(), NOW()
 WHERE NOT EXISTS (
@@ -29,7 +13,7 @@ WHERE NOT EXISTS (
     WHERE nombre = 'Proyecto Oleoducto Bicentenario' AND proyecto_id = 1
 );
 
--- 4. Add Gobernanza layer group
+-- 2. Add Gobernanza layer group
 INSERT INTO layer_groups (nombre, orden, fold_state, parent_group_id, proyecto_id, created_at, updated_at)
 SELECT 'Gobernanza', 6, 'close', NULL, 1, NOW(), NOW()
 WHERE NOT EXISTS (
@@ -37,7 +21,7 @@ WHERE NOT EXISTS (
     WHERE nombre = 'Gobernanza' AND proyecto_id = 1
 );
 
--- 5. Add Restauración layer group
+-- 3. Add Restauración layer group
 INSERT INTO layer_groups (nombre, orden, fold_state, parent_group_id, proyecto_id, created_at, updated_at)
 SELECT 'Restauración', 7, 'close', NULL, 1, NOW(), NOW()
 WHERE NOT EXISTS (
@@ -45,12 +29,12 @@ WHERE NOT EXISTS (
     WHERE nombre = 'Restauración' AND proyecto_id = 1
 );
 
--- 6. Add GEF Páramos layer group
+-- 4. Add Conflictos socioambientales en páramos layer group
 INSERT INTO layer_groups (nombre, orden, fold_state, parent_group_id, proyecto_id, created_at, updated_at)
-SELECT 'GEF Páramos', 8, 'close', NULL, 1, NOW(), NOW()
+SELECT 'Conflictos socioambientales en páramos', 8, 'close', NULL, 1, NOW(), NOW()
 WHERE NOT EXISTS (
     SELECT 1 FROM layer_groups
-    WHERE nombre = 'GEF Páramos' AND proyecto_id = 1
+    WHERE nombre = 'Conflictos socioambientales en páramos' AND proyecto_id = 1
 );
 
 -- Now add the layers for each group
@@ -110,16 +94,16 @@ SELECT 'scen_mincost_target4', 'Escenario mínimo costo target 4', 'Historicos',
 FROM layer_groups lg
 WHERE lg.nombre = 'Restauración' AND lg.proyecto_id = 1;
 
--- Add GEF Páramos layers
+-- Add Conflictos socioambientales en páramos layers
 INSERT INTO layers (nombre_geoserver, nombre_display, store_geoserver, estado_inicial, metadata_id, orden, grupo_id, created_at, updated_at)
 SELECT 'paramo', 'Paramos', 'Historicos', false, NULL, 1, lg.id, NOW(), NOW()
 FROM layer_groups lg
-WHERE lg.nombre = 'GEF Páramos' AND lg.proyecto_id = 1;
+WHERE lg.nombre = 'Conflictos socioambientales en páramos' AND lg.proyecto_id = 1;
 
 INSERT INTO layers (nombre_geoserver, nombre_display, store_geoserver, estado_inicial, metadata_id, orden, grupo_id, created_at, updated_at)
 SELECT 'municipio', 'Municipios', 'Historicos', false, NULL, 2, lg.id, NOW(), NOW()
 FROM layer_groups lg
-WHERE lg.nombre = 'GEF Páramos' AND lg.proyecto_id = 1;
+WHERE lg.nombre = 'Conflictos socioambientales en páramos' AND lg.proyecto_id = 1;
 
 -- Verify the changes
 SELECT

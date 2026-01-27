@@ -41,10 +41,6 @@ class Command(BaseCommand):
         # Create layer groups for General project
         if general_project:
             self.create_general_project_layers(general_project)
-        
-        # Create layer groups for Ecoreservas project
-        if ecoreservas_project:
-            self.create_ecoreservas_project_layers(ecoreservas_project)
             
         self.stdout.write(self.style.SUCCESS('Successfully populated project data'))
 
@@ -55,7 +51,7 @@ class Command(BaseCommand):
         historicos_group, _ = LayerGroup.objects.get_or_create(
             proyecto=project,
             nombre='Historicos',
-            defaults={'orden': 1, 'fold_state': 'close'}
+            defaults={'orden': 2, 'fold_state': 'close'}
         )
         
         # Add layers to Historicos
@@ -86,7 +82,7 @@ class Command(BaseCommand):
         fondo_group, _ = LayerGroup.objects.get_or_create(
             proyecto=project,
             nombre='Fondo de adaptación',
-            defaults={'orden': 2, 'fold_state': 'close'}
+            defaults={'orden': 3, 'fold_state': 'close'}
         )
         
         fondo_layers = [
@@ -113,7 +109,7 @@ class Command(BaseCommand):
         conservacion_group, _ = LayerGroup.objects.get_or_create(
             proyecto=project,
             nombre='Conservación de la Biodiversidad',
-            defaults={'orden': 3, 'fold_state': 'close'}
+            defaults={'orden': 5, 'fold_state': 'close'}
         )
         
         conservacion_layers = [
@@ -141,66 +137,3 @@ class Command(BaseCommand):
                     'orden': i
                 }
             )
-
-    def create_ecoreservas_project_layers(self, project):
-        """Create comprehensive layer groups and layers for ecoreservas project based on layers.js"""
-        
-        # All ecoreservas layers from the original layers.js
-        ecoreservas_groups = [
-            {
-                'name': 'Preservación - Compensación',
-                'orden': 1,
-                'layers': [
-                    ('Preservación_priorizando_todos_los_enfoques_Inversión_no_menos_1_', 'Todos los enfoques de costos-Inversión en compensación', True),
-                    ('Preservación_priorizando_Costos_de_Oportunidad_Inversión_no_menos_1_', 'Costos de oportunidad-Inversión en compensación', False),
-                    ('Preservación_priorizando_Costos_Abióticos_Inversión_no_menos_1_', 'Costos ecológicos-Inversión en compensación', False),
-                ]
-            },
-            {
-                'name': 'Restauración - Compensación', 
-                'orden': 2,
-                'layers': [
-                    ('Restauración_priorizando_todos_los_enfoques_Compensación', 'Todos los enfoques de costos-Inversión en compensación', False),
-                    ('Restauración_priorizando_Costos_de_Oportunidad_Compensación', 'Costos de oportunidad-Inversión en compensación', False),
-                    ('Restauración_priorizando_Costos_Abióticos_Compensación', 'Costos ecológicos-Inversión en compensación', False),
-                ]
-            },
-            {
-                'name': 'Uso Sostenible - Compensación',
-                'orden': 3, 
-                'layers': [
-                    ('Uso_Sostenible_priorizando_todos_los_enfoques_Compensación', 'Todos los enfoques de costos-Inversión en compensación', False),
-                    ('Uso_Sostenible_priorizando_Costos_de_Oportunidad_Compensación', 'Costos de oportunidad-Inversión en compensación', False),
-                    ('Uso_Sostenible_priorizando_Costos_Abióticos_Compensación', 'Costos ecológicos-Inversión en compensación', False),
-                ]
-            },
-            {
-                'name': 'Preservación - Inversión Voluntaria',
-                'orden': 4,
-                'layers': [
-                    ('Preservación_priorizando_todos_los_enfoques_Inversión_Voluntaria', 'Todos los enfoques de costos-Inversiones voluntarias', False),
-                    ('Preservación_riorizando_Costos_de_Oportunidad_Inversión_Voluntaria', 'Costos de oportunidad-Inversiones voluntarias', False),
-                    ('Preservación_priorizando_Costos_Abióticos_Inversión_Voluntaria', 'Costos ecológicos-Inversiones voluntarias', False),
-                ]
-            }
-        ]
-        
-        for group_data in ecoreservas_groups:
-            group, _ = LayerGroup.objects.get_or_create(
-                proyecto=project,
-                nombre=group_data['name'],
-                defaults={'orden': group_data['orden'], 'fold_state': 'close'}
-            )
-            
-            for i, (geoserver_name, display_name, initial_state) in enumerate(group_data['layers']):
-                Layer.objects.get_or_create(
-                    grupo=group,
-                    nombre_geoserver=geoserver_name,
-                    defaults={
-                        'nombre_display': display_name,
-                        'store_geoserver': 'ecoreservas',
-                        'estado_inicial': initial_state,
-                        'metadata_id': '4eca511b-d4db-49bc-8efa-a1f20e7c45ac',
-                        'orden': i
-                    }
-                )
