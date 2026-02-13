@@ -2,4 +2,4 @@ from django.apps import AppConfig
 
 
 class DeptoConfig(AppConfig):
-    name = 'depto'
+    name = 'applications.dpto'

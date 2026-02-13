@@ -4,5 +4,6 @@ from . import views
 
 urlpatterns = [
     path('api/mpio/charts/<kid>', views.mpioQuery.as_view()),
-    path('api/mpio/dangerCharts/<kid>', views.mpioDanger.as_view())
+    path('api/mpio/dangerCharts/<kid>', views.mpioDanger.as_view()),
+    path('api/mpio/search/<search_term>', views.mpioSearch.as_view()),
 ]
