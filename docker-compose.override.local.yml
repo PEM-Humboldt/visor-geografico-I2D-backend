@@ -1,0 +1,10 @@
+version: "3"
+
+services:
+  web:
+    networks:
+    - i2d_visor
+
+networks:
+  i2d_visor:
+    external: true
