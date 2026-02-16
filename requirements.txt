@@ -38,6 +38,9 @@ reportlab>=4.0.4
 openpyxl>=3.1.2
 xlsxwriter>=3.1.9
 
+# Dotenv
+python-dotenv>=1.0.0
+
 # REMOVED DEPRECATED PACKAGES:
 # unicode==2.9  # DEPRECATED - removed for security
 # pytz==2021.1  # DEPRECATED - Django 4.2+ uses zoneinfo
