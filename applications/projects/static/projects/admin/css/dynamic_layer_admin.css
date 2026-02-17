@@ -1,0 +1,235 @@
+/* Dynamic Layer Admin Styles */
+
+/* Project selector styling */
+.proyecto-selector {
+    min-width: 200px;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.proyecto-selector:focus {
+    border-color: #4CAF50 !important;
+    box-shadow: 0 0 8px rgba(76, 175, 80, 0.3) !important;
+    outline: none;
+}
+
+.proyecto-selector:hover {
+    border-color: #bbb;
+}
+
+/* Group selector styling */
+.grupo-selector {
+    min-width: 300px;
+    padding: 8px 12px;
+    border: 2px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.grupo-selector:focus {
+    border-color: #2196F3 !important;
+    box-shadow: 0 0 8px rgba(33, 150, 243, 0.3) !important;
+    outline: none;
+}
+
+.grupo-selector:disabled {
+    background-color: #f5f5f5 !important;
+    color: #999 !important;
+    cursor: not-allowed;
+    border-color: #e0e0e0;
+}
+
+.grupo-selector:hover:not(:disabled) {
+    border-color: #bbb;
+}
+
+/* Loading indicator */
+.loading-groups {
+    display: inline-block;
+    margin-left: 10px;
+    color: #666;
+    font-style: italic;
+    animation: pulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes pulse {
+    from { opacity: 1; }
+    to { opacity: 0.5; }
+}
+
+/* Message styling */
+.dynamic-message {
+    margin: 10px 0;
+    padding: 12px 16px;
+    border-radius: 6px;
+    font-weight: 500;
+    border: 1px solid;
+    animation: slideIn 0.3s ease-out;
+}
+
+.dynamic-message.success {
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+    color: #155724;
+}
+
+.dynamic-message.errornote {
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+    color: #721c24;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Fieldset enhancements */
+.form-row .field-proyecto {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    margin-bottom: 15px;
+}
+
+.form-row .field-proyecto label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.form-row .field-grupo {
+    position: relative;
+}
+
+/* Help text styling */
+.help {
+    font-size: 12px;
+    color: #6c757d;
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+/* Enhanced fieldset styling */
+fieldset.module h2 {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 16px;
+    margin: 0;
+    border-radius: 6px 6px 0 0;
+    font-weight: 600;
+}
+
+fieldset.module {
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Special styling for project selection fieldset */
+fieldset.module:first-of-type h2 {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+/* Form row improvements */
+.form-row {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.form-row:last-child {
+    border-bottom: none;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .proyecto-selector,
+    .grupo-selector {
+        min-width: 100%;
+        width: 100%;
+    }
+
+    .form-row {
+        padding: 10px;
+    }
+}
+
+/* Admin list view enhancements */
+.admin-object-tools {
+    margin-bottom: 20px;
+}
+
+.admin-object-tools a {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.admin-object-tools a:hover {
+    background: linear-gradient(135deg, #45a049 0%, #4CAF50 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Enhanced table styling */
+
+
+#result_list tr:hover {
+    background-color: #f8f9fa;
+    transition: background-color 0.2s ease;
+}
+
+/* Project column highlighting */
+#result_list .field-get_proyecto {
+    font-weight: 600;
+    color: #4CAF50;
+}
+
+/* Status indicators */
+.field-estado_inicial input[type="checkbox"]:checked {
+    accent-color: #4CAF50;
+}
+
+/* Form validation styling */
+.errorlist {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 4px;
+    margin: 10px 0;
+    list-style: none;
+}
+
+.errorlist li {
+    margin: 0;
+    padding: 2px 0;
+}
+
+/* Success feedback */
+.success-message {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 12px;
+    border-radius: 4px;
+    margin: 10px 0;
+}
