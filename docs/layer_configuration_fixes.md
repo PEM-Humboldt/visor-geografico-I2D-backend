@@ -159,16 +159,22 @@ curl -s "https://geoservicios.humboldt.org.co/geoserver/weplan/wms?SERVICE=WMS&V
 
 5. **GEF Páramos**: 2 layers ✅ **Fixed**
    - Paramos (`gefparamos:paramo`)
-   - Municipios (`gefparamos:municipio`)
+   - Municipios (`gefparamos:municipio`)  
 
 ## Scripts Used
 
-### 1. SQL Script: `add_missing_general_layer_groups.sql`
-- Creates missing layer groups and layers
-- Uses correct Django table names (`layer_groups`, `layers`, `projects`)
-- Includes verification queries
+### 1. Python Script: `populate_projects.py`
+- Populates database with current project configuration
+- Adds layers and layer groups for general project
 
 ### 2. Python Script: `add_missing_layers.py`
+- Add missing layers for general project
+- Django ORM-based approach for adding layer groups
+- Includes error handling and validation
+- Provides detailed output of changes
+
+### 3. Python Script: `create_ecoreservas_layers.py`
+- Add layers and layer groups for ecoreservas projects
 - Django ORM-based approach for adding layer groups
 - Includes error handling and validation
 - Provides detailed output of changes
