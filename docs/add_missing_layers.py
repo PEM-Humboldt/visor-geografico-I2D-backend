@@ -76,7 +76,7 @@ def main():
         restauracion_group = created_groups['Restauración']
         restauracion_layers = [
             {'geoserver': 'integr_total4326', 'display': 'Integridad', 'store_geoserver': 'restauracion', 'metadata': '55d29ef5-e419-489f-a450-3299e4bcc4d4', 'orden': 1},
-            {'geoserver': 'red_viveros', 'display': 'Red Viveros',  'store_geoserver': 'visor', 'metadata': None, 'orden': 2},
+            {'geoserver': 'red_viveros', 'display': 'Red Viveros',  'store_geoserver': 'visor', 'metadata': '7UAZDX', 'orden': 2},
             {'geoserver': 'scen_mincost_target1', 'display': 'Escenario mínimo costo target 1', 'store_geoserver': 'weplan', 'metadata': '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 'orden': 3},
             {'geoserver': 'scen_mincost_target2', 'display': 'Escenario mínimo costo target 2', 'store_geoserver': 'weplan', 'metadata': '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 'orden': 4},
             {'geoserver': 'scen_mincost_target3', 'display': 'Escenario mínimo costo target 3', 'store_geoserver': 'weplan', 'metadata': '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 'orden': 5},
@@ -104,6 +104,7 @@ def main():
             defaults={
                 'nombre_display': 'Paramos',
                 'store_geoserver': 'gefparamos',
+                'metadata': 'LPM4RE',
                 'estado_inicial': False,
                 'orden': 1
             }
@@ -114,6 +115,7 @@ def main():
             defaults={
                 'nombre_display': 'Municipios',
                 'store_geoserver': 'gefparamos',
+                'metadata': 'LPM4RE',
                 'estado_inicial': False,
                 'orden': 2
             }
