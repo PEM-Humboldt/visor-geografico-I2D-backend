@@ -526,7 +526,7 @@ def create_ecoreservas_structure():
             parent_group=parent_group,
             defaults={
                 'orden': config.get('orden', 0),
-                'color': config.get('color', '#e3e3e3'),
+                'color': config.get('color', '#eeeeee'),
                 'fold_state': 'close'
             }
         )
