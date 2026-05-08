@@ -19,7 +19,7 @@ class Project(models.Model):
         max_length=50,
         default='streetmap',
         choices=[
-            ('streetmap', 'Street Map'),
+            ('streetmap', 'OpenStreetMap'),
             ('cartodb_positron', 'CartoDB Positron'),
             ('otm', 'OpenTopoMap'),
             ('bw', 'Black & White'),
