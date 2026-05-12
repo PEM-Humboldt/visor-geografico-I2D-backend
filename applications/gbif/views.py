@@ -135,7 +135,7 @@ def descargarzip(request):
                 {'error': 'Código de municipio inválido (debe ser 5 dígitos)'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-        table_name = 'mpio_queries'
+        column_name = 'codigo_mpio'
         codigo = codigo_mpio
     else:
         if not re.match(r'^\d{2}$', codigo_dpto):
@@ -143,7 +143,7 @@ def descargarzip(request):
                 {'error': 'Código de departamento inválido (debe ser 2 dígitos)'}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
-        table_name = 'dpto_queries'
+        column_name = 'codigo_dpto'
         codigo = codigo_dpto
     
     # Validate and sanitize filename
@@ -152,18 +152,11 @@ def descargarzip(request):
     
     # Use parameterized queries to prevent SQL injection
     registros_query = f"""
-        SELECT codigo, tipo, registers, species, exoticas, endemicas, nombre 
-        FROM gbif_consultas.{table_name} 
-        WHERE codigo = %s
+        SELECT * FROM gbif.gbif WHERE {column_name} = %s
     """
-    
+
     especies_query = f"""
-        SELECT DISTINCT 
-            'Animalia' as reino, '' as filo, '' as clase, '' as orden, 
-            '' as familia, '' as genero, species as especies, 
-            endemicas, 0 as amenazadas, exoticas
-        FROM gbif_consultas.{table_name} 
-        WHERE codigo = %s
+        SELECT * FROM gbif.lista_especies_consulta WHERE {column_name} = %s
     """
     
     # Execute with parameters (prevents SQL injection)

@@ -19,7 +19,7 @@ class Project(models.Model):
         max_length=50,
         default='streetmap',
         choices=[
-            ('streetmap', 'Street Map'),
+            ('streetmap', 'OpenStreetMap'),
             ('cartodb_positron', 'CartoDB Positron'),
             ('otm', 'OpenTopoMap'),
             ('bw', 'Black & White'),
@@ -64,7 +64,7 @@ class LayerGroup(models.Model):
     )
     color = models.CharField(
         max_length=7,
-        default='#e3e3e3',
+        default='#eeeeee',
         validators=[
             RegexValidator(
                 regex=r'^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$',

@@ -87,7 +87,7 @@ SELECT v.nombre_geoserver, v.nombre_display, v.store_geoserver, v.estado_inicial
 FROM (
   VALUES
     ('integr_total4326',     'Integridad',                         'Historicos', false, '55d29ef5-e419-489f-a450-3299e4bcc4d4', 1),
-    ('red_viveros',         'Red Viveros',                        'Historicos', false, NULL,                                      2),
+    ('red_viveros',         'Red Viveros',                        'Historicos', false, '7UAZDX', 2),
     ('scen_mincost_target1','Escenario mínimo costo target 1',    'Historicos', false, '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 3),
     ('scen_mincost_target2','Escenario mínimo costo target 2',    'Historicos', false, '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 4),
     ('scen_mincost_target3','Escenario mínimo costo target 3',    'Historicos', false, '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 5),

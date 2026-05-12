@@ -90,7 +90,7 @@ class LayerGroupColorAPITests(APITestCase):
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['color'], '#e3e3e3')
+        self.assertEqual(response.data['color'], '#eeeeee')
 
     def test_update_layer_group_color(self):
         """Test PUT updates color"""

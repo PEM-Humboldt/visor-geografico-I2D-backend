@@ -42,7 +42,7 @@ class LayerGroupColorTests(TestCase):
             proyecto=self.project,
             nombre='Test Group'
         )
-        self.assertEqual(group.color, '#e3e3e3')
+        self.assertEqual(group.color, '#eeeeee')
 
     def test_lowercase_hex_color(self):
         """Test lowercase hex color is accepted"""
