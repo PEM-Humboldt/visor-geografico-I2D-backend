@@ -6,7 +6,7 @@
 [![PostGIS](https://img.shields.io/badge/PostGIS-3.4-4169E1?style=flat&logo=postgresql&logoColor=white)](https://postgis.net/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white)](https://docs.docker.com/)
 
-Versión actual: 1.2.0
+Versión actual: 1.2.1
 
 El backend del Visor Geográfico I2D es un sistema robusto de información geográfica que permite la gestión, consulta y visualización de datos de biodiversidad. Desarrollado con Django y PostGIS, proporciona APIs REST completas para la interacción con registros biológicos georeferenciados. 
 

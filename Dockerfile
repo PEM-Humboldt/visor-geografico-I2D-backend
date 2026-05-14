@@ -49,7 +49,7 @@ CMD ["gunicorn", \
      "--worker-connections", "1000", \
      "--max-requests", "1000", \
      "--max-requests-jitter", "100", \
-     "--timeout", "30", \
+     "--timeout", "360", \
      "--keep-alive", "2", \
      "--log-level", "info", \
      "i2dbackend.wsgi:application"]
