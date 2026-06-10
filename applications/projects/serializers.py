@@ -11,7 +11,7 @@ class LayerSerializer(serializers.ModelSerializer):
         model = Layer
         fields = [
             'id', 'nombre_geoserver', 'nombre_display', 'store_geoserver',
-            'estado_inicial', 'metadata_id', 'orden'
+            'estado_inicial', 'metadata_selector', 'metadata_id', 'orden'
         ]
 
 

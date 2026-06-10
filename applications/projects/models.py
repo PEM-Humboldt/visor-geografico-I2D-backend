@@ -91,11 +91,17 @@ class Layer(models.Model):
     """
     Model for individual layers
     """
+    class Selection(models.TextChoices):
+        GEOGRAFICO = 'geografico', 'Geográfico'
+        BIOLOGICO = 'biologico', 'Biológico'
+        BIOCULTURAL = 'biocultural', 'Biocultural'
+        EXTERNO = 'externo', 'Externo'
     grupo = models.ForeignKey(LayerGroup, on_delete=models.CASCADE, related_name='layers')
     nombre_geoserver = models.CharField(max_length=200, help_text="GeoServer layer name")
     nombre_display = models.CharField(max_length=200, help_text="Display name in frontend")
     store_geoserver = models.CharField(max_length=200, help_text="GeoServer store name")
     estado_inicial = models.BooleanField(default=False, help_text="Initial visibility state")
+    metadata_selector = models.CharField(max_length=100, choices=Selection.choices, default=Selection.GEOGRAFICO, help_text="Metadata catalog", )
     metadata_id = models.CharField(
         max_length=500,
         blank=True,
