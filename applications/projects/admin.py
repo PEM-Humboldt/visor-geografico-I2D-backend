@@ -187,7 +187,7 @@ class LayerAdmin(admin.ModelAdmin):
             'fields': ('nombre_geoserver', 'store_geoserver')
         }),
         ('Display Configuration', {
-            'fields': ('estado_inicial', 'metadata_id')
+            'fields': ('estado_inicial', 'metadata_selector', 'metadata_id')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
