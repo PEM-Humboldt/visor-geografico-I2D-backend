@@ -1,14 +1,19 @@
 {
     "mpios": {
-        "05088": "Bello",
+        "11001": "Bogota",
         "05001": "Medellin",
-        "05212": "Copacabana",
-        "05266": "Envigado",
-        "05129": "Caldas",
-        "05631": "Sabaneta",
-        "68001": "Bucaramanga"
+        "76001": "Cali",
+        "47001": "Santa Marta",
+        "13001": "Cartagena",
+        "27001": "Quibdo",
+        "68001": "Bucaramanga",
+        "73001": "Ibague"
     },
     "dptos": {
-        "05": "Antioquia"
+        "25": "Cundinamarca",
+        "68": "Santander",
+        "47": "Magdalena",
+        "05": "Antioquia",
+        "07": "Valle"
     }
 }
