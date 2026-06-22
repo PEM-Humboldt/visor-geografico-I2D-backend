@@ -1,8 +1,9 @@
+import os
 from django.shortcuts import render
 import io
 import csv
 import zipfile
-from django.http import HttpResponse
+from django.http import HttpResponse, FileResponse
 from django.db import connection
 
 from rest_framework.generics import ListAPIView
@@ -15,6 +16,7 @@ from drf_yasg import openapi
 
 from .models import gbifInfo
 from .serializers import gbifInfoSerializer
+from .utils import *
 
 class GbifInfo(ListAPIView):
     """
@@ -150,28 +152,30 @@ def descargarzip(request):
     nombre = request.GET.get('nombre', 'descarga_datos')[:50]
     nombre = re.sub(r'[^a-zA-Z0-9_-]', '', nombre) or 'descarga_datos'
 
-    # Use parameterized queries to prevent SQL injection
-    registros_query = f"""
-        SELECT * FROM gbif.gbif WHERE {column_name} = %s
-    """
+    # Check if files already exists
+    storage_dir = os.path.join(os.getenv('MEDIA_ROOT', '/app/media'), 'cached_zips')
+    os.makedirs(storage_dir, exist_ok=True)
+    file_path = os.path.join(storage_dir, f"reporte_{nombre}.zip")
 
-    especies_query = f"""
-        SELECT DISTINCT reino, filo, clase, orden, familia, genero, especies, 
-        endemicas, amenazadas, exoticas 
-        FROM gbif.lista_especies_consulta WHERE {column_name} = %s
-    """
+    if os.path.exists(file_path):
+        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=f"reporte_{nombre}.zip")
+    else:
+        zip = generar_zip(codigo, column_name, nombre)
 
-    # Execute with parameters (prevents SQL injection)
-    registros_csv = generar_csv(registros_query, [codigo])
-    especies_csv = generar_csv(especies_query, [codigo])
+        # Adds code to json for future updates
+        codigos_file = os.path.join(os.getenv('MEDIA_ROOT', '/app/media'), 'codes.json')
 
-    # Empaquetar ZIP
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        zip_file.writestr('registros.csv', registros_csv)
-        zip_file.writestr('lista_especies.csv', especies_csv)
+        if os.path.exists(codigos_file):
+            with open(codigos_file, 'r') as f:
+                codigos = json.load(f)
 
-    zip_buffer.seek(0)
-    response = HttpResponse(zip_buffer, content_type='application/zip')
-    response['Content-Disposition'] = f'attachment; filename={nombre}.zip'
-    return response
+            dict = codigos.get('mpios', {}) if column_name == 'codigo_mpio' else codigos.get('dptos', {})
+
+            if codigo not in dict:
+                dict[codigo] = nombre
+                with open(codigos_file, 'w') as fp:
+                    json.dump(codigos, fp)
+
+        response = HttpResponse(zip, content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename={nombre}.zip'
+        return response
