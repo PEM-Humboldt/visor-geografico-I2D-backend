@@ -14,6 +14,7 @@ class Project(models.Model):
     nivel_zoom = models.FloatField(default=6.0, help_text="Default zoom level")
     coordenada_central_x = models.FloatField(help_text="Center X coordinate")
     coordenada_central_y = models.FloatField(help_text="Center Y coordinate")
+    extent = models.CharField(max_length=200, help_text="Extent of project", default="-7430902, -479413, -8795762, 1408887")
     panel_visible = models.BooleanField(default=True, help_text="Panel visibility on startup")
     base_map_visible = models.CharField(
         max_length=50,
