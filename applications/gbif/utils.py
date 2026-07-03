@@ -1,7 +1,6 @@
 import io
 import os
 import csv
-import json
 import zipfile
 from django.db import connection
 from django.conf import settings
