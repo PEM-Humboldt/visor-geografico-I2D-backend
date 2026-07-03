@@ -4,6 +4,7 @@ import csv
 import json
 import zipfile
 from django.db import connection
+from django.conf import settings
 
 def generar_csv(query, params):
     output = io.StringIO()
@@ -18,7 +19,7 @@ def generar_csv(query, params):
 
 def generar_zip(codigo, column_name, nombre):
     # Check directory
-    output_dir = os.path.join(os.getenv('MEDIA_ROOT', '/app/media'), 'cached_zips')
+    output_dir = os.path.join(settings.MEDIA_ROOT, 'cached_zips')
     os.makedirs(output_dir, exist_ok=True)
     file_path = os.path.join(output_dir, f"reporte_{nombre}.zip")
 

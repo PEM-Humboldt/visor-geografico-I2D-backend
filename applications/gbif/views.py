@@ -2,7 +2,7 @@ import os
 from django.shortcuts import render
 import io
 import csv
-import zipfile
+import json
 from django.http import HttpResponse, FileResponse
 from django.db import connection
 
@@ -16,7 +16,9 @@ from drf_yasg import openapi
 
 from .models import gbifInfo
 from .serializers import gbifInfoSerializer
-from .utils import *
+from .utils import generar_zip
+
+from django.conf import settings
 
 class GbifInfo(ListAPIView):
     """
@@ -49,17 +51,6 @@ class GbifInfo(ListAPIView):
 
     def get_queryset(self):
         return gbifInfo.objects.all()
-
-def generar_csv(query, params):
-    output = io.StringIO()
-    with connection.cursor() as cursor:
-        cursor.execute(query, params)
-        columns = [col[0] for col in cursor.description]
-        writer = csv.writer(output)
-        writer.writerow(columns)
-        for row in cursor:
-            writer.writerow(row)
-    return output.getvalue()
 
 @swagger_auto_schema(
     method='get',
@@ -153,7 +144,7 @@ def descargarzip(request):
     nombre = re.sub(r'[^a-zA-Z0-9_-]', '', nombre) or 'descarga_datos'
 
     # Check if files already exists
-    storage_dir = os.path.join(os.getenv('MEDIA_ROOT', '/app/media'), 'cached_zips')
+    storage_dir = os.path.join(settings.MEDIA_ROOT, 'cached_zips')
     os.makedirs(storage_dir, exist_ok=True)
     file_path = os.path.join(storage_dir, f"reporte_{nombre}.zip")
 
@@ -163,7 +154,7 @@ def descargarzip(request):
         zip = generar_zip(codigo, column_name, nombre)
 
         # Adds code to json for future updates
-        codigos_file = os.path.join(os.getenv('MEDIA_ROOT', '/app/media'), 'codes.json')
+        codigos_file = os.path.join(settings.MEDIA_ROOT, 'codes.json')
 
         if os.path.exists(codigos_file):
             with open(codigos_file, 'r') as f:
