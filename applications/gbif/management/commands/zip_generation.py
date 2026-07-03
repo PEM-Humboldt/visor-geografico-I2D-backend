@@ -4,13 +4,14 @@ import json
 import traceback
 from applications.gbif.utils import *
 from django.utils import timezone
+from django.conf import settings
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
         def now():
             return f"[{timezone.now().strftime('%Y-%m-%d %H:%M:%S')}] "
         
-        codigos_file = os.path.join(os.getenv('MEDIA_ROOT', '/app/media'), 'codes.json')
+        codigos_file = os.path.join(settings.MEDIA_ROOT, 'codes.json')
 
         if os.path.exists(codigos_file):
             try:
@@ -26,7 +27,7 @@ class Command(BaseCommand):
             return
 
 
-        output_dir = os.path.join(os.getenv('MEDIA_ROOT', '/app/media'), 'cached_zips')
+        output_dir = os.path.join(settings.MEDIA_ROOT, 'cached_zips')
         os.makedirs(output_dir, exist_ok=True)
 
         stats = {"success": 0, "failed": 0}
