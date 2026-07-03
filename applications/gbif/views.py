@@ -177,5 +177,5 @@ def descargarzip(request):
                     json.dump(codigos, fp)
 
         response = HttpResponse(zip, content_type='application/zip')
-        response['Content-Disposition'] = f'attachment; filename={nombre}.zip'
+        response['Content-Disposition'] = f'attachment; filename=reporte_{nombre}.zip'
         return response
