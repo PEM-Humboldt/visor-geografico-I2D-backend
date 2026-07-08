@@ -23,7 +23,7 @@ class ProjectAdmin(admin.ModelAdmin):
             'fields': ('logo_pequeno_url', 'logo_completo_url')
         }),
         ('Map Configuration', {
-            'fields': ('nivel_zoom', 'coordenada_central_x', 'coordenada_central_y', 'base_map_visible')
+            'fields': ('nivel_zoom', 'coordenada_central_x', 'coordenada_central_y', 'base_map_visible', 'extent')
         }),
         ('UI Configuration', {
             'fields': ('panel_visible',)

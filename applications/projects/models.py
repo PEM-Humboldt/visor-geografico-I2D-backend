@@ -38,6 +38,26 @@ class Project(models.Model):
         verbose_name = 'Project'
         verbose_name_plural = 'Projects'
 
+    def calculate_extent(self):
+        max_resolution = 156543.03392804097
+        resolution = max_resolution/2 ** self.nivel_zoom
+
+        half_width = (1000 * resolution) / 2
+        half_height = (1000 * resolution) / 2
+        
+        minx = self.coordenada_central_x - half_width
+        miny = self.coordenada_central_y - half_height
+        maxx = self.coordenada_central_x + half_width
+        maxy = self.coordenada_central_y + half_height
+
+        return [minx, miny, maxx, maxy]
+
+    def save(self, *args, **kwargs):
+        if self.coordenada_central_x and self.coordenada_central_y and self.nivel_zoom:
+            extent = self.calculate_extent()
+            self.extent = ", ".join(str(e) for e in extent)
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.nombre} ({self.nombre_corto})"
 
