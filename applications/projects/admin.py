@@ -13,7 +13,7 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = ['nombre_corto', 'nombre', 'nivel_zoom', 'panel_visible', 'created_at']
     list_filter = ['panel_visible', 'base_map_visible', 'created_at']
     search_fields = ['nombre_corto', 'nombre']
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at', 'extent']
 
     fieldsets = (
         ('Basic Information', {
