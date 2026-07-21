@@ -3,6 +3,7 @@ from django.shortcuts import render
 import io
 import csv
 import json
+import boto3
 from django.http import HttpResponse, FileResponse
 from django.db import connection
 
@@ -16,9 +17,12 @@ from drf_yasg import openapi
 
 from .models import gbifInfo
 from .serializers import gbifInfoSerializer
-from .utils import generar_zip
+from .utils import generar_zip, connect_s3, sanitize_name
 
 from django.conf import settings
+from django.shortcuts import redirect
+
+from botocore.exceptions import ClientError
 
 class GbifInfo(ListAPIView):
     """
@@ -140,33 +144,48 @@ def descargarzip(request):
         codigo = codigo_dpto
 
     # Validate and sanitize filename
-    nombre = request.GET.get('nombre', 'descarga_datos')[:50]
-    nombre = re.sub(r'[^a-zA-Z0-9_-]', '', nombre) or 'descarga_datos'
+    if column_name == 'codigo_mpio':
+        query = "SELECT nombre FROM capas_base.mpio_politico WHERE codigo = %s"
+    else:
+        query = "SELECT nombre FROM capas_base.dpto_politico WHERE codigo = %s"
+
+    with connection.cursor() as cursor:
+        cursor.execute(query, [codigo])
+        row = cursor.fetchone()    
+    
+    if row and row[0]:
+        nombre_raw = row[0]
+    else:
+        nombre_raw = "descarga_datos"
+
+    nombre = sanitize_name(nombre_raw)
 
     # Check if files already exists
-    storage_dir = os.path.join(settings.MEDIA_ROOT, 'cached_zips')
-    os.makedirs(storage_dir, exist_ok=True)
-    file_path = os.path.join(storage_dir, f"reporte_{nombre}.zip")
+    filename = f'reporte_{nombre}.zip'
+    try:
+        s3 = connect_s3()
+        s3.head_object(Bucket=settings.S3_BUCKET_NAME, Key=filename)
+    except ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            generar_zip(codigo, column_name, nombre)
+        else:
+            raise e
+        
+    url = generate_download_url(filename)
 
-    if os.path.exists(file_path):
-        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=f"reporte_{nombre}.zip")
-    else:
-        zip = generar_zip(codigo, column_name, nombre)
+    return redirect(url)
 
-        # Adds code to json for future updates
-        codigos_file = os.path.join(settings.MEDIA_ROOT, 'codes.json')
+def generate_download_url(filename):
+    s3_client = connect_s3()
 
-        if os.path.exists(codigos_file):
-            with open(codigos_file, 'r') as f:
-                codigos = json.load(f)
+    url = s3_client.generate_presigned_url(
+        ClientMethod='get_object',
+        Params={
+            'Bucket': settings.S3_BUCKET_NAME,
+            'Key': filename,
+            "ResponseContentDisposition": f'attachment; filename="{filename}"'
+        },
+        ExpiresIn=300
+    )
 
-            dict = codigos.get('mpios', {}) if column_name == 'codigo_mpio' else codigos.get('dptos', {})
-
-            if codigo not in dict:
-                dict[codigo] = nombre
-                with open(codigos_file, 'w') as fp:
-                    json.dump(codigos, fp)
-
-        response = HttpResponse(zip, content_type='application/zip')
-        response['Content-Disposition'] = f'attachment; filename=reporte_{nombre}.zip'
-        return response
+    return url

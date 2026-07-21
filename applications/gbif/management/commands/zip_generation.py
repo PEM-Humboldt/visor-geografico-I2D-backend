@@ -45,7 +45,7 @@ class Command(BaseCommand):
                 mpio_name = code['mpio_nombre']
 
                 self.stdout.write(f"Generating ZIP at {now()} for MPIO {mpio_name} - {mpio_code}...")
-                #generar_zip(mpio_code, 'codigo_mpio', mpio_name)
+                generar_zip(mpio_code, 'codigo_mpio', mpio_name)
                 stats["success"] += 1
             except Exception as e:
                 stats["failed"] += 1
@@ -58,15 +58,13 @@ class Command(BaseCommand):
                 try:
                     dpto_name = code['dpto_nombre']
 
-                    self.stdout.write(f"============== Generating ZIP at {now()} for DPTO {dpto_name} - {dpto_code}...")
-                    #generar_zip(dpto_code, 'codigo_dpto', dpto_name)
+                    self.stdout.write(f"=== Generating ZIP at {now()} for DPTO {dpto_name} - {dpto_code}...")
+                    generar_zip(dpto_code, 'codigo_dpto', dpto_name)
                     stats["success"] += 1
                     zipped_dptos.append(dpto_code)
                 except Exception as e:
                     stats["failed"] += 1
                     self.stdout.write(self.style.ERROR(f"FAILED at {now()} - ERROR generating ZIP for Department: {dpto_name} - {dpto_code}. Error: {str(e)}"))
                     self.stdout.write(traceback.format_exc())
-
-        print("Dptos generated: ", len(zipped_dptos))
 
         self.stdout.write(self.style.SUCCESS(f"ZIP generation completed at {now()}. Summary: {stats['success']} succeeded, {stats['failed']} failed."))

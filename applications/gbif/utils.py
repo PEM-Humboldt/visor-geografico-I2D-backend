@@ -2,8 +2,25 @@ import io
 import os
 import csv
 import zipfile
+import re
+import boto3
+import unicodedata
 from django.db import connection
-from django.conf import settings
+from django.conf import settings 
+
+def connect_s3():
+    return boto3.client(
+        's3',
+        endpoint_url=settings.S3_ENDPOINT_URL,
+        region_name=settings.S3_DEFAULT_REGION,
+        aws_access_key_id=settings.S3_ACCESS_KEY,
+        aws_secret_access_key=settings.S3_SECRET_ACCESS_KEY
+    )
+
+def sanitize_name(nombre):
+    nfd_name = unicodedata.normalize("NFD", nombre)
+    no_accent_name = nfd_name.encode("ASCII", "ignore").decode("utf-8")
+    return re.sub(r'[^a-zA-Z0-9_-]', '', no_accent_name) or 'descarga_datos'
 
 def generar_csv(query, params):
     output = io.StringIO()
@@ -17,10 +34,10 @@ def generar_csv(query, params):
     return output.getvalue()
 
 def generar_zip(codigo, column_name, nombre):
-    # Check directory
-    output_dir = os.path.join(settings.MEDIA_ROOT, 'cached_zips')
-    os.makedirs(output_dir, exist_ok=True)
-    file_path = os.path.join(output_dir, f"reporte_{nombre}.zip")
+
+    clean_name = sanitize_name(nombre)
+
+    s3_client = connect_s3()
 
     # Use parameterized queries to prevent SQL injection
     registros_query = f"""
@@ -44,8 +61,12 @@ def generar_zip(codigo, column_name, nombre):
         zip_file.writestr('lista_especies.csv', especies_csv)
         
     zip = zip_buffer.getvalue()
-    with open(file_path, 'wb') as f:
-        f.write(zip)
+    
+    # Uploads file to bucket
+    s3_client.put_object(
+        Bucket=settings.S3_BUCKET_NAME,
+        Key=f'reporte_{clean_name}.zip',
+        Body=zip,
+    )
 
-    return zip
-
+    zip_buffer.close()
