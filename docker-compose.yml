@@ -11,7 +11,6 @@ services:
       - ./:/project
       - static_volume:/app/static
       - media_volume:/app/media
-      - ./codes.json:/app/media/codes.json
     networks:
       - backend
 
