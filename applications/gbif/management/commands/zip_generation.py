@@ -30,9 +30,6 @@ class Command(BaseCommand):
                 dict(zip(columns, row))
                 for row in cursor.fetchall()
             ]
-        
-        output_dir = os.path.join(settings.MEDIA_ROOT, 'cached_zips')
-        os.makedirs(output_dir, exist_ok=True)
 
         stats = {"success": 0, "failed": 0}
         zipped_dptos = []
