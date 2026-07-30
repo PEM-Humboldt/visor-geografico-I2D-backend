@@ -17,7 +17,7 @@ from drf_yasg import openapi
 
 from .models import gbifInfo
 from .serializers import gbifInfoSerializer
-from .utils import generar_zip, connect_s3, sanitize_name
+from .utils import generate_zip, connect_s3, sanitize_name
 
 from django.conf import settings
 from django.shortcuts import redirect
@@ -133,7 +133,7 @@ def descargarzip(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         column_name = 'codigo_mpio'
-        codigo = codigo_mpio
+        code = codigo_mpio
     else:
         if not re.match(r'^\d{2}$', codigo_dpto):
             return Response(
@@ -141,7 +141,7 @@ def descargarzip(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         column_name = 'codigo_dpto'
-        codigo = codigo_dpto
+        code = codigo_dpto
 
     # Validate and sanitize filename
     if column_name == 'codigo_mpio':
@@ -150,24 +150,24 @@ def descargarzip(request):
         query = "SELECT nombre FROM capas_base.dpto_politico WHERE codigo = %s"
 
     with connection.cursor() as cursor:
-        cursor.execute(query, [codigo])
+        cursor.execute(query, [code])
         row = cursor.fetchone()    
     
     if row and row[0]:
-        nombre_raw = row[0]
+        raw_name = row[0]
     else:
-        nombre_raw = "descarga_datos"
+        raw_name = "descarga_datos"
 
-    nombre = sanitize_name(nombre_raw)
+    name = sanitize_name(raw_name)
 
     # Check if files already exists
-    filename = f'reporte_{nombre}.zip'
+    filename = f'reporte_{name}.zip'
     try:
         s3 = connect_s3()
         s3.head_object(Bucket=settings.S3_BUCKET_NAME, Key=filename)
     except ClientError as e:
         if e.response['Error']['Code'] == "404":
-            generar_zip(codigo, column_name, nombre)
+            generate_zip(code, column_name, name)
         else:
             raise e
         

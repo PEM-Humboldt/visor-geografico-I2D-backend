@@ -1,10 +1,8 @@
 from django.core.management.base import BaseCommand
-import os
-import json
 import traceback
-from applications.gbif.utils import *
+from applications.gbif.utils import generate_zip
 from django.utils import timezone
-from django.conf import settings
+from django.db import connection
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
@@ -18,7 +16,7 @@ class Command(BaseCommand):
                 d.codigo AS dpto_codigo,
                 d.nombre AS dpto_nombre
             FROM capas_base.mpio_politico m
-            INNER JOIN dpto_politico d ON LEFT(m.codigo, 2) = d.codigo
+            INNER JOIN capas_base.dpto_politico d ON LEFT(m.codigo, 2) = d.codigo
             ORDER BY dpto_codigo;
         """
         
@@ -32,7 +30,7 @@ class Command(BaseCommand):
             ]
 
         stats = {"success": 0, "failed": 0}
-        zipped_dptos = []
+        zipped_dptos = set()
 
         for code in codes:
 
@@ -42,7 +40,7 @@ class Command(BaseCommand):
                 mpio_name = code['mpio_nombre']
 
                 self.stdout.write(f"Generating ZIP at {now()} for MPIO {mpio_name} - {mpio_code}...")
-                generar_zip(mpio_code, 'codigo_mpio', mpio_name)
+                generate_zip(mpio_code, 'codigo_mpio', mpio_name)
                 stats["success"] += 1
             except Exception as e:
                 stats["failed"] += 1
@@ -56,9 +54,9 @@ class Command(BaseCommand):
                     dpto_name = code['dpto_nombre']
 
                     self.stdout.write(f"=== Generating ZIP at {now()} for DPTO {dpto_name} - {dpto_code}...")
-                    generar_zip(dpto_code, 'codigo_dpto', dpto_name)
+                    generate_zip(dpto_code, 'codigo_dpto', dpto_name)
                     stats["success"] += 1
-                    zipped_dptos.append(dpto_code)
+                    zipped_dptos.add(dpto_code)
                 except Exception as e:
                     stats["failed"] += 1
                     self.stdout.write(self.style.ERROR(f"FAILED at {now()} - ERROR generating ZIP for Department: {dpto_name} - {dpto_code}. Error: {str(e)}"))
