@@ -17,8 +17,8 @@ def connect_s3():
         aws_secret_access_key=settings.S3_SECRET_ACCESS_KEY
     )
 
-def sanitize_name(nombre):
-    nfd_name = unicodedata.normalize("NFD", nombre)
+def sanitize_name(name):
+    nfd_name = unicodedata.normalize("NFD", name)
     no_accent_name = nfd_name.encode("ASCII", "ignore").decode("utf-8")
     return re.sub(r'[^a-zA-Z0-9_-]', '', no_accent_name) or 'descarga_datos'
 
@@ -33,9 +33,9 @@ def generate_csv(query, params):
             writer.writerow(row)
     return output.getvalue()
 
-def generate_zip(codigo, column_name, nombre):
+def generate_zip(codigo, column_name, name):
 
-    clean_name = sanitize_name(nombre)
+    clean_name = sanitize_name(name)
 
     s3_client = connect_s3()
 
