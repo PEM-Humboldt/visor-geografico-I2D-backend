@@ -1,8 +1,10 @@
+import os
 from django.shortcuts import render
 import io
 import csv
-import zipfile
-from django.http import HttpResponse
+import json
+import boto3
+from django.http import HttpResponse, FileResponse
 from django.db import connection
 
 from rest_framework.generics import ListAPIView
@@ -15,6 +17,12 @@ from drf_yasg import openapi
 
 from .models import gbifInfo
 from .serializers import gbifInfoSerializer
+from .utils import generate_zip, connect_s3, sanitize_name
+
+from django.conf import settings
+from django.shortcuts import redirect
+
+from botocore.exceptions import ClientError
 
 class GbifInfo(ListAPIView):
     """
@@ -47,17 +55,6 @@ class GbifInfo(ListAPIView):
 
     def get_queryset(self):
         return gbifInfo.objects.all()
-
-def generar_csv(query, params):
-    output = io.StringIO()
-    with connection.cursor() as cursor:
-        cursor.execute(query, params)
-        columns = [col[0] for col in cursor.description]
-        writer = csv.writer(output)
-        writer.writerow(columns)
-        for row in cursor:
-            writer.writerow(row)
-    return output.getvalue()
 
 @swagger_auto_schema(
     method='get',
@@ -136,7 +133,7 @@ def descargarzip(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         column_name = 'codigo_mpio'
-        codigo = codigo_mpio
+        code = codigo_mpio
     else:
         if not re.match(r'^\d{2}$', codigo_dpto):
             return Response(
@@ -144,34 +141,51 @@ def descargarzip(request):
                 status=status.HTTP_400_BAD_REQUEST
             )
         column_name = 'codigo_dpto'
-        codigo = codigo_dpto
+        code = codigo_dpto
 
     # Validate and sanitize filename
-    nombre = request.GET.get('nombre', 'descarga_datos')[:50]
-    nombre = re.sub(r'[^a-zA-Z0-9_-]', '', nombre) or 'descarga_datos'
+    if column_name == 'codigo_mpio':
+        query = "SELECT nombre FROM capas_base.mpio_politico WHERE codigo = %s"
+    else:
+        query = "SELECT nombre FROM capas_base.dpto_politico WHERE codigo = %s"
 
-    # Use parameterized queries to prevent SQL injection
-    registros_query = f"""
-        SELECT * FROM gbif.gbif WHERE {column_name} = %s
-    """
+    with connection.cursor() as cursor:
+        cursor.execute(query, [code])
+        row = cursor.fetchone()    
+    
+    if row and row[0]:
+        raw_name = row[0]
+    else:
+        raw_name = "descarga_datos"
 
-    especies_query = f"""
-        SELECT DISTINCT reino, filo, clase, orden, familia, genero, especies, 
-        endemicas, amenazadas, exoticas 
-        FROM gbif.lista_especies_consulta WHERE {column_name} = %s
-    """
+    name = sanitize_name(raw_name)
 
-    # Execute with parameters (prevents SQL injection)
-    registros_csv = generar_csv(registros_query, [codigo])
-    especies_csv = generar_csv(especies_query, [codigo])
+    # Check if files already exists
+    filename = f'reporte_{name}.zip'
+    try:
+        s3 = connect_s3()
+        s3.head_object(Bucket=settings.S3_BUCKET_NAME, Key=filename)
+    except ClientError as e:
+        if e.response['Error']['Code'] == "404":
+            generate_zip(code, column_name, name)
+        else:
+            raise e
+        
+    url = generate_download_url(filename)
 
-    # Empaquetar ZIP
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
-        zip_file.writestr('registros.csv', registros_csv)
-        zip_file.writestr('lista_especies.csv', especies_csv)
+    return redirect(url)
 
-    zip_buffer.seek(0)
-    response = HttpResponse(zip_buffer, content_type='application/zip')
-    response['Content-Disposition'] = f'attachment; filename={nombre}.zip'
-    return response
+def generate_download_url(filename):
+    s3_client = connect_s3()
+
+    url = s3_client.generate_presigned_url(
+        ClientMethod='get_object',
+        Params={
+            'Bucket': settings.S3_BUCKET_NAME,
+            'Key': filename,
+            "ResponseContentDisposition": f'attachment; filename="{filename}"'
+        },
+        ExpiresIn=300
+    )
+
+    return url
