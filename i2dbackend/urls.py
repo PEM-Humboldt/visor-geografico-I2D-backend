@@ -27,7 +27,7 @@ schema_view = get_schema_view(
 )
 
 def redirect_to_admin(request):
-    return redirect('/admin/')
+    return redirect('admin:index')
 
 urlpatterns = [
     path('', redirect_to_admin, name='home'),
