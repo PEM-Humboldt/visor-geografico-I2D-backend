@@ -7,6 +7,16 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeDynamicLayerGroups();
     });
 
+    // Deriva /{prefix}/admin/projects/layer/ajax/filter-groups-by-project/
+    // desde el path actual para respetar el prefijo del reverse proxy
+    // (ej: /visor-I2D/api). Funciona igual para /add/ y /{id}/change/.
+    function getFilterGroupsUrl() {
+        return window.location.pathname.replace(
+            /\/layer\/.*$/,
+            '/layer/ajax/filter-groups-by-project/'
+        );
+    }
+
     function initializeDynamicLayerGroups() {
         var $proyectoField = $('#id_proyecto');
         var $grupoField = $('#id_grupo');
@@ -34,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var currentValue = $grupoField.val();
 
             $.ajax({
-                url: '/admin/projects/layer/ajax/filter-groups-by-project/',
+                url: getFilterGroupsUrl(),
                 type: 'GET',
                 data: { 'project_id': projectId },
                 headers: {
@@ -72,7 +82,7 @@ document.addEventListener('DOMContentLoaded', function() {
             $proyectoField.trigger('change');
         } else if ($grupoField.val()) {
             $.ajax({
-                url: '/admin/projects/layer/ajax/filter-groups-by-project/',
+                url: getFilterGroupsUrl(),
                 type: 'GET',
                 data: { 'grupo_id': $grupoField.val() },
                 success: function(response) {

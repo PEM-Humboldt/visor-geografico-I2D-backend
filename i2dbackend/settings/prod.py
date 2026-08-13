@@ -23,17 +23,23 @@ DATABASES = {
     }
 }
 
-# Static files configuration
+# Sub-path bajo el que la app es expuesta por el reverse proxy / ALB.
+# Ej: si la app se accede en https://host/visor-I2D/api/, definir
+# FORCE_SCRIPT_NAME=/visor-I2D/api en el entorno. None = sin prefix.
+FORCE_SCRIPT_NAME = os.getenv('FORCE_SCRIPT_NAME') or None
+USE_X_FORWARDED_HOST = True
+
+# El ALB termina TLS y reenvía como HTTP al backend. Sin esto, Django
+# genera redirects http:// que rompen el flujo (login del admin, etc.).
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Static / media files configuration
 STATIC_ROOT = os.getenv('STATIC_ROOT', '/app/static')
 MEDIA_ROOT = os.getenv('MEDIA_ROOT', '/app/media')
 
-# S3 bucket configuration
-S3_ENDPOINT_URL= os.getenv('S3_ENDPOINT_URL')
-S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME', 'visors3')
-LOCALSTACK_AUTH_TOKEN = os.getenv('LOCALSTACK_AUTH_TOKEN')
-S3_ACCESS_KEY = os.getenv('S3_ACCESS_KEY')
-S3_SECRET_ACCESS_KEY = os.getenv('S3_SECRET_ACCESS_KEY')
-S3_DEFAULT_REGION = os.getenv('S3_DEFAULT_REGION', 'sa-east-1')
+_url_prefix = (FORCE_SCRIPT_NAME or '').rstrip('/')
+STATIC_URL = f'{_url_prefix}/static/'
+MEDIA_URL = f'{_url_prefix}/media/'
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
