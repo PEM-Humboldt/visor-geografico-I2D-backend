@@ -14,6 +14,7 @@ class Project(models.Model):
     nivel_zoom = models.FloatField(default=6.0, help_text="Default zoom level")
     coordenada_central_x = models.FloatField(help_text="Center X coordinate")
     coordenada_central_y = models.FloatField(help_text="Center Y coordinate")
+    extent = models.CharField(max_length=200, help_text="Extent of project (Self-generated)", default="-7430902, -479413, -8795762, 1408887")
     panel_visible = models.BooleanField(default=True, help_text="Panel visibility on startup")
     base_map_visible = models.CharField(
         max_length=50,
@@ -36,6 +37,26 @@ class Project(models.Model):
         db_table = 'projects'
         verbose_name = 'Project'
         verbose_name_plural = 'Projects'
+
+    def calculate_extent(self):
+        max_resolution = 156543.03392804097
+        resolution = max_resolution/2 ** self.nivel_zoom
+
+        half_width = (1000 * resolution) / 2
+        half_height = (1000 * resolution) / 2
+        
+        minx = self.coordenada_central_x - half_width
+        miny = self.coordenada_central_y - half_height
+        maxx = self.coordenada_central_x + half_width
+        maxy = self.coordenada_central_y + half_height
+
+        return [minx, miny, maxx, maxy]
+
+    def save(self, *args, **kwargs):
+        if self.coordenada_central_x and self.coordenada_central_y and self.nivel_zoom:
+            extent = self.calculate_extent()
+            self.extent = ", ".join(str(e) for e in extent)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.nombre} ({self.nombre_corto})"
@@ -91,11 +112,17 @@ class Layer(models.Model):
     """
     Model for individual layers
     """
+    class Selection(models.TextChoices):
+        GEOGRAFICO = 'geografico', 'Geográfico'
+        BIOLOGICO = 'biologico', 'Biológico'
+        BIOCULTURAL = 'biocultural', 'Biocultural'
+        EXTERNO = 'externo', 'Externo'
     grupo = models.ForeignKey(LayerGroup, on_delete=models.CASCADE, related_name='layers')
     nombre_geoserver = models.CharField(max_length=200, help_text="GeoServer layer name")
     nombre_display = models.CharField(max_length=200, help_text="Display name in frontend")
     store_geoserver = models.CharField(max_length=200, help_text="GeoServer store name")
     estado_inicial = models.BooleanField(default=False, help_text="Initial visibility state")
+    metadata_selector = models.CharField(max_length=100, choices=Selection.choices, default=Selection.GEOGRAFICO, help_text="Metadata catalog", )
     metadata_id = models.CharField(
         max_length=500,
         blank=True,

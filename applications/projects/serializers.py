@@ -11,7 +11,7 @@ class LayerSerializer(serializers.ModelSerializer):
         model = Layer
         fields = [
             'id', 'nombre_geoserver', 'nombre_display', 'store_geoserver',
-            'estado_inicial', 'metadata_id', 'orden'
+            'estado_inicial', 'metadata_selector', 'metadata_id', 'orden'
         ]
 
 
@@ -57,7 +57,7 @@ class ProjectSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'nombre_corto', 'nombre', 'logo_pequeno_url', 'logo_completo_url',
             'nivel_zoom', 'coordenada_central_x', 'coordenada_central_y',
-            'panel_visible', 'base_map_visible', 'created_at', 'updated_at'
+            'panel_visible', 'base_map_visible', 'created_at', 'updated_at', 'extent'
         ]
 
 
@@ -70,6 +70,6 @@ class ProjectDetailSerializer(serializers.ModelSerializer):
         model = Project
         fields = [
             'id', 'nombre_corto', 'nombre', 'logo_pequeno_url', 'logo_completo_url',
-            'nivel_zoom', 'coordenada_central_x', 'coordenada_central_y',
+            'nivel_zoom', 'coordenada_central_x', 'coordenada_central_y', 'extent',
             'panel_visible', 'base_map_visible', 'layer_groups', 'created_at', 'updated_at'
         ]

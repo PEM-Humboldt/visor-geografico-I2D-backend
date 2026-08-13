@@ -75,12 +75,12 @@ def main():
         # Add layers for Restauración
         restauracion_group = created_groups['Restauración']
         restauracion_layers = [
-            {'geoserver': 'integr_total4326', 'display': 'Integridad', 'store_geoserver': 'restauracion', 'metadata': '55d29ef5-e419-489f-a450-3299e4bcc4d4', 'orden': 1},
-            {'geoserver': 'red_viveros', 'display': 'Red Viveros',  'store_geoserver': 'visor', 'metadata': '7UAZDX', 'orden': 2},
-            {'geoserver': 'scen_mincost_target1', 'display': 'Escenario mínimo costo target 1', 'store_geoserver': 'weplan', 'metadata': '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 'orden': 3},
-            {'geoserver': 'scen_mincost_target2', 'display': 'Escenario mínimo costo target 2', 'store_geoserver': 'weplan', 'metadata': '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 'orden': 4},
-            {'geoserver': 'scen_mincost_target3', 'display': 'Escenario mínimo costo target 3', 'store_geoserver': 'weplan', 'metadata': '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 'orden': 5},
-            {'geoserver': 'scen_mincost_target4', 'display': 'Escenario mínimo costo target 4', 'store_geoserver': 'weplan', 'metadata': '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 'orden': 6}
+            {'geoserver': 'integr_total4326', 'display': 'Integridad', 'store_geoserver': 'restauracion', 'metadata_selector': 'geografico', 'metadata': '55d29ef5-e419-489f-a450-3299e4bcc4d4', 'orden': 1},
+            {'geoserver': 'red_viveros', 'display': 'Red Viveros',  'store_geoserver': 'visor', 'metadata_selector': 'biocultural', 'metadata': '7UAZDX', 'orden': 2},
+            {'geoserver': 'scen_mincost_target1', 'display': 'Escenario mínimo costo target 1', 'store_geoserver': 'weplan', 'metadata_selector': 'geografico', 'metadata': '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 'orden': 3},
+            {'geoserver': 'scen_mincost_target2', 'display': 'Escenario mínimo costo target 2', 'store_geoserver': 'weplan', 'metadata_selector': 'geografico', 'metadata': '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 'orden': 4},
+            {'geoserver': 'scen_mincost_target3', 'display': 'Escenario mínimo costo target 3', 'store_geoserver': 'weplan', 'metadata_selector': 'geografico', 'metadata': '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 'orden': 5},
+            {'geoserver': 'scen_mincost_target4', 'display': 'Escenario mínimo costo target 4', 'store_geoserver': 'weplan', 'metadata_selector': 'geografico', 'metadata': '1d6b06b6-8a57-4c87-97ef-e156cb40dc46', 'orden': 6}
         ]
 
         for layer_data in restauracion_layers:
@@ -91,6 +91,7 @@ def main():
                     'nombre_display': layer_data['display'],
                     'store_geoserver': layer_data['store_geoserver'],
                     'estado_inicial': False,
+                    'metadata_selector': layer_data['metadata_selector'],
                     'metadata_id': layer_data['metadata'],
                     'orden': layer_data['orden']
                 }
@@ -104,6 +105,7 @@ def main():
             defaults={
                 'nombre_display': 'Paramos',
                 'store_geoserver': 'gefparamos',
+                'metadata_selector': 'biocultural',
                 'metadata': 'LPM4RE',
                 'estado_inicial': False,
                 'orden': 1
@@ -115,6 +117,7 @@ def main():
             defaults={
                 'nombre_display': 'Municipios',
                 'store_geoserver': 'gefparamos',
+                'metadata_selector': 'biocultural',
                 'metadata': 'LPM4RE',
                 'estado_inicial': False,
                 'orden': 2
