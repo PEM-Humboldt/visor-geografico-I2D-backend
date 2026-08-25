@@ -40,7 +40,7 @@ MEDIA_ROOT = os.getenv('MEDIA_ROOT', '/app/media')
 # S3 bucket configuration
 S3_ENDPOINT_URL= os.getenv('S3_ENDPOINT_URL', 'http://localhost:4566')
 S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME', 'visors3')
-LOCALSTACK_AUTH_TOKEN = os.getenv('LOCALSTACK_AUTH_TOKEN')
+S3_AUTH_TOKEN = os.getenv('S3_AUTH_TOKEN')
 S3_ACCESS_KEY = os.getenv('S3_ACCESS_KEY')
 S3_SECRET_ACCESS_KEY = os.getenv('S3_SECRET_ACCESS_KEY')
 S3_DEFAULT_REGION = os.getenv('S3_DEFAULT_REGION', 'sa-east-1')
