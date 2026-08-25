@@ -1,5 +1,5 @@
 # Dockerfile - Visor I2D Backend
-FROM python:3.12-slim-bookworm
+FROM public.ecr.aws/docker/library/python:3.12-slim-bookworm
 
 # Environment variables
 ENV PYTHONDONTWRITEBYTECODE=1 \
