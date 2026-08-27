@@ -6,7 +6,7 @@
 [![PostGIS](https://img.shields.io/badge/PostGIS-3.4-4169E1?style=flat&logo=postgresql&logoColor=white)](https://postgis.net/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white)](https://docs.docker.com/)
 
-Versión actual: 1.2.1
+Versión actual: 1.3.0
 
 El backend del Visor Geográfico I2D es un sistema robusto de información geográfica que permite la gestión, consulta y visualización de datos de biodiversidad. Desarrollado con Django y PostGIS, proporciona APIs REST completas para la interacción con registros biológicos georeferenciados. 
 
@@ -108,14 +108,14 @@ Complete el archivo con las credenciales correspondientes y ubíquelo en una rut
 ### 1.3. Configuración de variables de entorno (.env)
 
 El proyecto también soporta configuración mediante variables de entorno usando un archivo `.env`. Puede crear un archivo `.env` a partir de `env.example`:
-`docker cp .env.example .env` 
+`cp .env.example .env` 
 
 Este archivo debe estar en la raíz del proyecto y debe hacer referencia a las siguientes variables:
 
 #### Variables de base de datos:
 ```bash
 # Configuración de base de datos
-DB_ENGINE=django.db.backends.postgresql_psycopg2
+DB_ENGINE=django.contrib.gis.db.backends.postgis
 DB_NAME=nombre_de_tu_base_de_datos
 DB_USER=usuario_de_base_de_datos
 DB_PASSWORD=contraseña_de_base_de_datos
@@ -483,32 +483,6 @@ Usa el script de auditoría para monitoreo regular:
 cd docs/
 ./database_audit.sh weekly_audit_$(date +%Y%m%d).md
 ```
-
----
-
-## 🔄 Changelog Reciente
-
-### ✅ Versión Actual (2025-08-28)
-
-#### Funcionalidades Implementadas:
-- **Django GIS Completo**: PostGIS habilitado con GeometryField
-- **API de Búsqueda**: Endpoint `/api/mpio/search/<term>/` funcional
-- **Sistema de Proyectos**: APIs REST para gestión dinámica
-- **Auditoría de BD**: Script completo con métricas de rendimiento
-- **Optimización**: Consultas espaciales optimizadas
-
-#### Correcciones Críticas:
-- **DisallowedHost**: ALLOWED_HOSTS configurado correctamente
-- **Docker Volumes**: Mapeo corregido a `/project`
-- **Variables de Entorno**: Soporte completo para configuración
-- **Static Files**: Servicio de archivos estáticos en desarrollo
-
-#### Mejoras de Rendimiento:
-- **Índices Espaciales**: Implementados en campos de geometría
-- **Query Optimization**: Consultas específicas sin SELECT *
-- **Connection Pooling**: Configuración PostgreSQL optimizada
-
----
 
 ## 🤝 Contribución
 
