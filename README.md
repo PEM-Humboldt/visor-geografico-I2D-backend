@@ -488,9 +488,7 @@ cd docs/
 
 ### 👥 Equipo de Desarrollo
 
-- **Julián David Torres Caicedo** - *Desarrollo Backend* - [juliant8805](https://github.com/juliant8805)
-- **Liceth Barandica Diaz** - *Desarrollo Backend* - [licethbarandicadiaz](https://github.com/licethbarandicadiaz)
-- **Daniel López** - *DevOps y Despliegue* - [danflop](https://github.com/danflop)
+- **Gerencia de Información Científica**
 
 ### 📝 Cómo Contribuir
 
