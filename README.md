@@ -6,7 +6,7 @@
 [![PostGIS](https://img.shields.io/badge/PostGIS-3.4-4169E1?style=flat&logo=postgresql&logoColor=white)](https://postgis.net/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ED?style=flat&logo=docker&logoColor=white)](https://docs.docker.com/)
 
-Versión actual: 1.2.1
+Versión actual: 1.3.0
 
 El backend del Visor Geográfico I2D es un sistema robusto de información geográfica que permite la gestión, consulta y visualización de datos de biodiversidad. Desarrollado con Django y PostGIS, proporciona APIs REST completas para la interacción con registros biológicos georeferenciados. 
 
@@ -107,12 +107,15 @@ Complete el archivo con las credenciales correspondientes y ubíquelo en una rut
 
 ### 1.3. Configuración de variables de entorno (.env)
 
-El proyecto también soporta configuración mediante variables de entorno usando un archivo `.env`. Crear un archivo `.env` en la raíz del proyecto con las siguientes variables:
+El proyecto también soporta configuración mediante variables de entorno usando un archivo `.env`. Puede crear un archivo `.env` a partir de `env.example`:
+`cp .env.example .env` 
+
+Este archivo debe estar en la raíz del proyecto y debe hacer referencia a las siguientes variables:
 
 #### Variables de base de datos:
 ```bash
 # Configuración de base de datos
-DB_ENGINE=django.db.backends.postgresql_psycopg2
+DB_ENGINE=django.contrib.gis.db.backends.postgis
 DB_NAME=nombre_de_tu_base_de_datos
 DB_USER=usuario_de_base_de_datos
 DB_PASSWORD=contraseña_de_base_de_datos
@@ -134,6 +137,17 @@ MEDIA_ROOT=/app/media
 
 # Configuración de CORS
 CORS_ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+```
+
+#### Variables de S3
+```bash
+# Estas variables deben ser configuradas en caso de necesitar conexión con un S3
+S3_ENDPOINT_URL=http://localhost:4566 # Never use '_' 
+S3_BUCKET_NAME=visors3
+S3_AUTH_TOKEN=token
+S3_ACCESS_KEY=access_key
+S3_SECRET_ACCESS_KEY=secret_access_key
+S3_DEFAULT_REGION=sa-east-1
 ```
 
 **Nota:** Las variables de entorno tienen prioridad sobre los valores del archivo `secret.json`. Si una variable está definida en ambos lugares, se usará el valor de la variable de entorno.
@@ -170,13 +184,13 @@ La instrucción iniciará el proyecto en su entorno de desarrollo.
 
 ### 2.1 Descripción
 
-Él despliegue en producción de la aplicación se realizará utilizando [Gunicorn](https://gunicorn.org) como servidor de aplicaciones WSGI HTTP y [NGINX](https://www.nginx.com)  como servidor web.
+Él despliegue en producción de la aplicación se realizará utilizando [Gunicorn](https://gunicorn.org) como servidor de aplicaciones WSGI HTTP y [NGINX](https://www.nginx.com) como servidor web.
 
 Por esta razón se utilizará un contenedor [Docker](https://www.docker.com) para cada componente: 1) *Django con Gunicorn* y 2) *NGINX*. El tercer componente es la base de datos, pero esa no está incluida en el alcance de este despligue y se asume su existencia.
 
-La herramienta [Docker-compose](https://docs.docker.com/compose/) se utilizará para la ejecución de los dos componentes y su interacción.
+La herramienta [Docker compose](https://docs.docker.com/compose/) se utilizará para la ejecución de los dos componentes y su interacción.
 
-### 2.1. Instalación de Docker y Docker-compose
+### 2.1. Instalación de Docker y Docker compose
 
 Es necesario contar con la versión 19.03.13 de Docker o superior y Docker-compose versión 1.28.5.
 
@@ -189,29 +203,26 @@ Una vez se haya clonado el repositorio, verificar que en la raíz del mismo se e
 - dockerfile
 - docker-compose.yml
 - default.conf
-- (opcional) `secret.json` si decide usar archivo de secretos. Alternativamente, configure variables de entorno y/o `SECRET_FILE` apuntando a su JSON en una ruta segura.
+- `.env` (preferiblemente) o de manera alternativa `secret.json` si decide usar archivo de secretos. En caso de optar por la segunda opción, recuerde indicar su ruta en la variable `SECRET_FILE`.
 
 A continuación, desde la raíz del proyecto se debe ejecutar el siguiente comando para construir la imagen personalizada del contenedor que ejecutará el componente de Django con Gunicorn:
 
 ```
-docker-compose build
+docker compose build
 ```
 Se utilizará la  imagen  oficial del contenedor de NGINX que se encuentra [aquí](https://hub.docker.com/_/nginx), y por lo tanto no es necesario su creación.
 
 Para ejecutar los contenedores, se debe ejecutar el siguiente comando:
 
 ```
-docker-compose up -d
+docker compose up -d
 ```
 Para comprobar que los dos contenedores están en ejecución se puede revisar su estado de la siguiente manera:
 
 ```
 docker ps
 ```
-Finalmente, para generar los archivos estáticos que serán servidos por NGINX, se debe ejecutar este comando:
-```
-docker-compose exec web python manage.py collectstatic
-```
+
 ### 2.3. Cambios y ajustes
 
 Para realizar modificaciones sobre los puertos y los volúmenes de los contenedores, se pueden realizar sobre el archivo docker-compose.yml.
@@ -315,7 +326,7 @@ El script ha sido optimizado para evitar problemas de rendimiento:
 docker ps
 
 # Iniciar los contenedores si está detenido
-docker-compose up -d
+docker compose up -d
 ```
 
 #### Error: "bc command not found"
@@ -473,39 +484,11 @@ cd docs/
 ./database_audit.sh weekly_audit_$(date +%Y%m%d).md
 ```
 
----
-
-## 🔄 Changelog Reciente
-
-### ✅ Versión Actual (2025-08-28)
-
-#### Funcionalidades Implementadas:
-- **Django GIS Completo**: PostGIS habilitado con GeometryField
-- **API de Búsqueda**: Endpoint `/api/mpio/search/<term>/` funcional
-- **Sistema de Proyectos**: APIs REST para gestión dinámica
-- **Auditoría de BD**: Script completo con métricas de rendimiento
-- **Optimización**: Consultas espaciales optimizadas
-
-#### Correcciones Críticas:
-- **DisallowedHost**: ALLOWED_HOSTS configurado correctamente
-- **Docker Volumes**: Mapeo corregido a `/project`
-- **Variables de Entorno**: Soporte completo para configuración
-- **Static Files**: Servicio de archivos estáticos en desarrollo
-
-#### Mejoras de Rendimiento:
-- **Índices Espaciales**: Implementados en campos de geometría
-- **Query Optimization**: Consultas específicas sin SELECT *
-- **Connection Pooling**: Configuración PostgreSQL optimizada
-
----
-
 ## 🤝 Contribución
 
 ### 👥 Equipo de Desarrollo
 
-- **Julián David Torres Caicedo** - *Desarrollo Backend* - [juliant8805](https://github.com/juliant8805)
-- **Liceth Barandica Diaz** - *Desarrollo Backend* - [licethbarandicadiaz](https://github.com/licethbarandicadiaz)
-- **Daniel López** - *DevOps y Despliegue* - [danflop](https://github.com/danflop)
+- **Gerencia de Información Científica**
 
 ### 📝 Cómo Contribuir
 

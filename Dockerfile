@@ -31,16 +31,15 @@ RUN pip install --no-cache-dir -r requirements.txt && \
 # Project files
 COPY . /project/
 
+# Runs entrypoint
+RUN cp entrypoint.sh /usr/local/bin/entrypoint.sh && \
+    chmod +x /usr/local/bin/entrypoint.sh
+
 # Directories and permissions
 RUN mkdir -p /var/log/django /app/static /app/media
 
-# Collect static files at build time. Dummy env vars solo para satisfacer
-# la carga de settings; collectstatic no toca la DB ni usa el SECRET_KEY.
-RUN DJANGO_SECRET_KEY=build-dummy \
-    DB_NAME=x DB_USER=x DB_PASSWORD=x DB_HOST=x DB_PORT=5432 \
-    python manage.py collectstatic --noinput
-
-RUN chown -R django:django /project /var/log/django /app/static /app/media
+RUN mkdir -p /var/log/django /app/static /app/media && \
+    chown -R django:django /project /var/log/django /app/static /app/media /usr/local/bin/entrypoint.sh
 
 USER django
 
@@ -48,6 +47,8 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8001/health/simple/ || exit 1
 
 EXPOSE 8001
+
+ENTRYPOINT ["entrypoint.sh"]
 
 CMD ["gunicorn", \
      "--bind", "0.0.0.0:8001", \

@@ -55,6 +55,7 @@ def create_ecoreservas_structure():
                                     "nombre_display": "Todos los enfoques de costos-Inversión en compensación",
                                     "store_geoserver": "ecoreservas",
                                     "estado_inicial": False,
+                                    'metadata_selector': 'geografico',
                                     "metadata_id": "4eca511b-d4db-49bc-8efa-a1f20e7c45ac",
                                     "orden": 0
                                 },
@@ -63,6 +64,7 @@ def create_ecoreservas_structure():
                                     "nombre_display": "Costos de oportunidad-Inversión en compensación",
                                     "store_geoserver": "ecoreservas",
                                     "estado_inicial": False,
+                                    'metadata_selector': 'geografico',
                                     "metadata_id": "4eca511b-d4db-49bc-8efa-a1f20e7c45ac",
                                     "orden": 1
                                 },
@@ -71,6 +73,7 @@ def create_ecoreservas_structure():
                                     "nombre_display": "Costos ecológicos-Inversión en compensación",
                                     "store_geoserver": "ecoreservas",
                                     "estado_inicial": False,
+                                    'metadata_selector': 'geografico',
                                     "metadata_id": "4eca511b-d4db-49bc-8efa-a1f20e7c45ac",
                                     "orden": 2
                                 }

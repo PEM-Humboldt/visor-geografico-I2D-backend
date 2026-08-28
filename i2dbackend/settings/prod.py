@@ -18,8 +18,7 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME') or get_secret('DB_NAME'),
         'USER': os.getenv('DB_USER') or get_secret('USER'),
         'PASSWORD': os.getenv('DB_PASSWORD') or get_secret('PASSWORD'),
-        'HOST': os.getenv('DB_HOST') or get_secret('HOST'),
-        'PORT': os.getenv('DB_PORT') or get_secret('PORT'),
+        'HOST': os.getenv('DB_HOST') or get_secret('HOST')
     }
 }
 
@@ -40,6 +39,14 @@ MEDIA_ROOT = os.getenv('MEDIA_ROOT', '/app/media')
 _url_prefix = (FORCE_SCRIPT_NAME or '').rstrip('/')
 STATIC_URL = f'{_url_prefix}/static/'
 MEDIA_URL = f'{_url_prefix}/media/'
+
+# S3 bucket configuration
+S3_ENDPOINT_URL= os.getenv('S3_ENDPOINT_URL')
+S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME', 'visors3')
+S3_AUTH_TOKEN = os.getenv('S3_AUTH_TOKEN')
+S3_ACCESS_KEY = os.getenv('S3_ACCESS_KEY')
+S3_SECRET_ACCESS_KEY = os.getenv('S3_SECRET_ACCESS_KEY')
+S3_DEFAULT_REGION = os.getenv('S3_DEFAULT_REGION', 'sa-east-1')
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [

@@ -13,7 +13,7 @@ class ProjectAdmin(admin.ModelAdmin):
     list_display = ['nombre_corto', 'nombre', 'nivel_zoom', 'panel_visible', 'created_at']
     list_filter = ['panel_visible', 'base_map_visible', 'created_at']
     search_fields = ['nombre_corto', 'nombre']
-    readonly_fields = ['created_at', 'updated_at']
+    readonly_fields = ['created_at', 'updated_at', 'extent']
 
     fieldsets = (
         ('Basic Information', {
@@ -23,7 +23,7 @@ class ProjectAdmin(admin.ModelAdmin):
             'fields': ('logo_pequeno_url', 'logo_completo_url')
         }),
         ('Map Configuration', {
-            'fields': ('nivel_zoom', 'coordenada_central_x', 'coordenada_central_y', 'base_map_visible')
+            'fields': ('nivel_zoom', 'coordenada_central_x', 'coordenada_central_y', 'base_map_visible', 'extent')
         }),
         ('UI Configuration', {
             'fields': ('panel_visible',)
@@ -187,7 +187,7 @@ class LayerAdmin(admin.ModelAdmin):
             'fields': ('nombre_geoserver', 'store_geoserver')
         }),
         ('Display Configuration', {
-            'fields': ('estado_inicial', 'metadata_id')
+            'fields': ('estado_inicial', 'metadata_selector', 'metadata_id')
         }),
         ('Timestamps', {
             'fields': ('created_at', 'updated_at'),
