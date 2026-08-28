@@ -26,7 +26,9 @@ DATABASES = {
 
         'PASSWORD': os.getenv('DB_PASSWORD') or get_secret('PASSWORD'),
 
-        'HOST': os.getenv('DB_HOST') or get_secret('HOST')
+        'HOST': os.getenv('DB_HOST') or get_secret('HOST'),
+
+        'PORT': os.getenv('DB_PORT') or get_secret('PORT')
 
     }
 }
@@ -38,7 +40,7 @@ MEDIA_ROOT = os.getenv('MEDIA_ROOT', '/app/media')
 # S3 bucket configuration
 S3_ENDPOINT_URL= os.getenv('S3_ENDPOINT_URL', 'http://localhost:4566')
 S3_BUCKET_NAME = os.getenv('S3_BUCKET_NAME', 'visors3')
-S3_AUTH_TOKEN = os.getenv('S3_AUTH_TOKEN')
+LOCALSTACK_AUTH_TOKEN = os.getenv('LOCALSTACK_AUTH_TOKEN')
 S3_ACCESS_KEY = os.getenv('S3_ACCESS_KEY')
 S3_SECRET_ACCESS_KEY = os.getenv('S3_SECRET_ACCESS_KEY')
 S3_DEFAULT_REGION = os.getenv('S3_DEFAULT_REGION', 'sa-east-1')
