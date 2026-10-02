@@ -26,7 +26,9 @@ DATABASES = {
 
         'PASSWORD': os.getenv('DB_PASSWORD') or get_secret('PASSWORD'),
 
-        'HOST': os.getenv('DB_HOST') or get_secret('HOST')
+        'HOST': os.getenv('DB_HOST') or get_secret('HOST'),
+
+        'PORT': os.getenv('DB_PORT') or get_secret('PORT')
 
     }
 }
