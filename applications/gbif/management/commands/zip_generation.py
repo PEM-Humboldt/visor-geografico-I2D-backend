@@ -13,10 +13,9 @@ class Command(BaseCommand):
             SELECT 
                 m.codigo AS mpio_codigo,
                 m.nombre AS mpio_nombre,
-                d.codigo AS dpto_codigo,
-                d.nombre AS dpto_nombre
+                LEFT(m.codigo, 2) AS dpto_codigo,
+                m.dpto_nombre AS dpto_nombre
             FROM capas_base.mpio_politico m
-            INNER JOIN capas_base.dpto_politico d ON LEFT(m.codigo, 2) = d.codigo
             ORDER BY dpto_codigo;
         """
         
@@ -38,9 +37,10 @@ class Command(BaseCommand):
             try:
                 mpio_code = code['mpio_codigo']
                 mpio_name = code['mpio_nombre']
+                dpto_name = code['dpto_nombre']
 
                 self.stdout.write(f"Generating ZIP at {now()} for MPIO {mpio_name} - {mpio_code}...")
-                generate_zip(mpio_code, 'codigo_mpio', mpio_name)
+                generate_zip(mpio_code, 'codigo_mpio', f"{mpio_name}_{dpto_name}")
                 stats["success"] += 1
             except Exception as e:
                 stats["failed"] += 1
