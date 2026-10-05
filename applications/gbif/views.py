@@ -145,7 +145,11 @@ def descargarzip(request):
 
     # Validate and sanitize filename
     if column_name == 'codigo_mpio':
-        query = "SELECT nombre FROM capas_base.mpio_politico WHERE codigo = %s"
+        query = """
+            SELECT nombre, dpto_nombre
+            FROM capas_base.mpio_politico m
+            WHERE m.codigo = %s
+        """
     else:
         query = "SELECT nombre FROM capas_base.dpto_politico WHERE codigo = %s"
 
@@ -154,7 +158,11 @@ def descargarzip(request):
         row = cursor.fetchone()    
     
     if row and row[0]:
-        raw_name = row[0]
+        raw_name = (
+            f"{row[0]}_{row[1]}"
+            if column_name == 'codigo_mpio'
+            else row[0]
+        )
     else:
         raw_name = "descarga_datos"
 
